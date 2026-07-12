@@ -81,6 +81,7 @@
 
     let fotosExistentes = [];
     let novosArquivos = [];
+    let fotosProcessando = 0;
 
     function renderForm(moto) {
       document.getElementById('pageTitle').textContent = `Editar ${moto.marca} ${moto.modelo}`;
@@ -152,6 +153,7 @@
         const novos = Array.from(e.target.files);
         e.target.value = '';
 
+        fotosProcessando += novos.length;
         document.getElementById('formNote').textContent = 'Otimizando fotos...';
 
         for (const file of novos) {
@@ -160,7 +162,9 @@
             novosArquivos.push(comprimido);
           } catch (erro) {
             console.error('Erro ao comprimir foto:', erro);
-            novosArquivos.push(file);
+            alert(`Não foi possível processar a foto "${file.name}" (formato pode não ser suportado, ex.: HEIC do iPhone). Tente converter pra JPG/PNG antes de enviar.`);
+          } finally {
+            fotosProcessando--;
           }
         }
 
@@ -172,16 +176,20 @@
     }
 
     async function otimizarFotosExistentes() {
-      for (let i = 0; i < fotosExistentes.length; i++) {
-        const foto = fotosExistentes[i];
-        // Data URI base64: cada 1.37 caracteres ≈ 1 byte. Só otimiza se passar de ~700KB.
-        if (foto.length > 950000) {
-          try {
-            fotosExistentes[i] = await comprimirDataUri(foto);
-            renderPhotoGrid();
-          } catch (erro) {
-            console.error('Erro ao otimizar foto existente:', erro);
-          }
+      const paraOtimizar = fotosExistentes
+        .map((foto, i) => ({ foto, i }))
+        .filter(({ foto }) => foto.length > 950000);
+
+      fotosProcessando += paraOtimizar.length;
+
+      for (const { i } of paraOtimizar) {
+        try {
+          fotosExistentes[i] = await comprimirDataUri(fotosExistentes[i]);
+          renderPhotoGrid();
+        } catch (erro) {
+          console.error('Erro ao otimizar foto existente:', erro);
+        } finally {
+          fotosProcessando--;
         }
       }
     }
@@ -225,6 +233,15 @@
 
       const submitBtn = document.getElementById('submitBtn');
       const formNote = document.getElementById('formNote');
+
+      if (fotosProcessando > 0) {
+        formNote.textContent = 'Aguardando otimização das fotos...';
+        submitBtn.disabled = true;
+        while (fotosProcessando > 0) {
+          await new Promise(r => setTimeout(r, 150));
+        }
+      }
+
       submitBtn.disabled = true;
       formNote.textContent = 'Salvando...';
 

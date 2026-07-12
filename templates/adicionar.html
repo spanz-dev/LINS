@@ -120,6 +120,11 @@
     const formNote = document.getElementById('formNote');
 
     let arquivosSelecionados = [];
+    let fotosProcessando = 0;
+
+    function atualizarEstadoSubmit() {
+      submitBtn.disabled = fotosProcessando > 0;
+    }
 
     function showToast(msg) {
       toast.textContent = msg;
@@ -148,7 +153,9 @@
       const novos = Array.from(fotoInput.files);
       fotoInput.value = '';
 
+      fotosProcessando += novos.length;
       formNote.textContent = 'Otimizando fotos...';
+      atualizarEstadoSubmit();
 
       for (const file of novos) {
         try {
@@ -156,16 +163,24 @@
           arquivosSelecionados.push(comprimido);
         } catch (erro) {
           console.error('Erro ao comprimir foto:', erro);
-          arquivosSelecionados.push(file); // usa o original se a compressão falhar
+          alert(`Não foi possível processar a foto "${file.name}" (formato pode não ser suportado, ex.: HEIC do iPhone). Tente converter pra JPG/PNG antes de enviar. As outras fotos foram adicionadas normalmente.`);
+        } finally {
+          fotosProcessando--;
         }
       }
 
       formNote.textContent = 'Salva direto no seu banco de dados.';
+      atualizarEstadoSubmit();
       renderPreview();
     });
 
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
+
+      if (fotosProcessando > 0) {
+        alert('Ainda otimizando as fotos, aguarde um instante e tente de novo.');
+        return;
+      }
 
       submitBtn.disabled = true;
       formNote.textContent = 'Enviando...';

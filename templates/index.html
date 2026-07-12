@@ -84,32 +84,43 @@
       grid.innerHTML = motos.map(m => {
         const foto = m.fotos && m.fotos.length ? m.fotos[0] : null;
         const totalFotos = m.fotos ? m.fotos.length : 0;
+        const mensagemWhats = encodeURIComponent(`Olá! Tenho interesse na ${m.marca} ${m.modelo} (${m.ano}).`);
         return `
-        <a class="moto-card" href="/moto.html?id=${m.id}">
-          <div class="moto-photo">
-            ${foto
-              ? `<img src="${foto}" alt="${m.marca} ${m.modelo}">`
-              : `<span class="icon">${Icons.brand}</span>`}
-            ${totalFotos > 1 ? `<span class="photo-count">1/${totalFotos}</span>` : ''}
-          </div>
-          <div class="moto-body">
-            <div class="moto-brand">${m.marca}</div>
-            <div class="moto-name">${m.modelo}</div>
-            <div class="moto-sub">${m.cilindrada} cc · ${m.categoria}</div>
-
-            <div class="stat-box">
-              <div>
-                <div class="km">${Number(m.quilometragem).toLocaleString('pt-BR')}</div>
-                <div class="km-label">KM RODADOS</div>
-              </div>
-              <div class="side">
-                <b>${m.ano}</b><br>${m.categoria}
-              </div>
+        <div class="moto-card">
+          <a class="moto-card-link" href="/moto.html?id=${m.id}">
+            <div class="moto-photo">
+              ${foto
+                ? `<img src="${foto}" alt="${m.marca} ${m.modelo}">`
+                : `<span class="icon">${Icons.brand}</span>`}
+              ${totalFotos > 1 ? `<span class="photo-count">1/${totalFotos}</span>` : ''}
             </div>
+            <div class="moto-body">
+              <div class="moto-brand">${m.marca}</div>
+              <div class="moto-name">${m.modelo}</div>
+              <div class="moto-sub">${m.cilindrada} cc · ${m.categoria}</div>
 
-            <span class="tag">Nº ${String(m.id).padStart(4, '0')}</span>
+              <div class="stat-box">
+                <div>
+                  <div class="km">${Number(m.quilometragem).toLocaleString('pt-BR')}</div>
+                  <div class="km-label">KM RODADOS</div>
+                </div>
+                <div class="side">
+                  <b>${m.ano}</b><br>${m.categoria}
+                </div>
+              </div>
+
+              <span class="tag">Nº ${String(m.id).padStart(4, '0')}</span>
+            </div>
+          </a>
+          <div class="moto-card-actions">
+            <a class="card-details-btn" href="/moto.html?id=${m.id}">
+              <span class="icon">${Icons.search}</span> Ver informações
+            </a>
+            <a class="card-whatsapp-btn" href="https://wa.me/?text=${mensagemWhats}" target="_blank" rel="noopener" title="Enviar no WhatsApp" onclick="event.stopPropagation()">
+              <span class="icon">${Icons.whatsapp}</span>
+            </a>
           </div>
-        </a>
+        </div>
       `}).join('');
     }
 
