@@ -56,6 +56,7 @@
   <div class="toast" id="toast"></div>
 
   <script src="{{ url_for('static', filename='icons.js') }}"></script>
+  <script src="{{ url_for('static', filename='photo-utils.js') }}"></script>
   <script>
     document.getElementById('brandIcon').innerHTML = Icons.brand;
     document.getElementById('navMotoIcon').innerHTML = Icons.brand;
@@ -143,13 +144,46 @@
 
       renderPhotoGrid();
 
-      document.getElementById('fotoInput').addEventListener('change', (e) => {
-        novosArquivos = novosArquivos.concat(Array.from(e.target.files));
+      // Reduz automaticamente fotos antigas que ficaram grandes (ex.: cadastradas antes
+      // dessa otimização existir), pra não travar o próximo salvamento.
+      otimizarFotosExistentes();
+
+      document.getElementById('fotoInput').addEventListener('change', async (e) => {
+        const novos = Array.from(e.target.files);
         e.target.value = '';
+
+        document.getElementById('formNote').textContent = 'Otimizando fotos...';
+
+        for (const file of novos) {
+          try {
+            const comprimido = await comprimirImagem(file);
+            novosArquivos.push(comprimido);
+          } catch (erro) {
+            console.error('Erro ao comprimir foto:', erro);
+            novosArquivos.push(file);
+          }
+        }
+
+        document.getElementById('formNote').textContent = 'As alterações são salvas no seu banco de dados.';
         renderPhotoGrid();
       });
 
       document.getElementById('motoForm').addEventListener('submit', enviarFormulario);
+    }
+
+    async function otimizarFotosExistentes() {
+      for (let i = 0; i < fotosExistentes.length; i++) {
+        const foto = fotosExistentes[i];
+        // Data URI base64: cada 1.37 caracteres ≈ 1 byte. Só otimiza se passar de ~700KB.
+        if (foto.length > 950000) {
+          try {
+            fotosExistentes[i] = await comprimirDataUri(foto);
+            renderPhotoGrid();
+          } catch (erro) {
+            console.error('Erro ao otimizar foto existente:', erro);
+          }
+        }
+      }
     }
 
     function renderPhotoGrid() {

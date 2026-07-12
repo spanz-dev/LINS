@@ -104,6 +104,7 @@
   <div class="toast" id="toast"></div>
 
   <script src="{{ url_for('static', filename='icons.js') }}"></script>
+  <script src="{{ url_for('static', filename='photo-utils.js') }}"></script>
   <script>
     document.getElementById('brandIcon').innerHTML = Icons.brand;
     document.getElementById('navMotoIcon').innerHTML = Icons.brand;
@@ -143,9 +144,23 @@
       });
     }
 
-    fotoInput.addEventListener('change', () => {
-      arquivosSelecionados = arquivosSelecionados.concat(Array.from(fotoInput.files));
+    fotoInput.addEventListener('change', async () => {
+      const novos = Array.from(fotoInput.files);
       fotoInput.value = '';
+
+      formNote.textContent = 'Otimizando fotos...';
+
+      for (const file of novos) {
+        try {
+          const comprimido = await comprimirImagem(file);
+          arquivosSelecionados.push(comprimido);
+        } catch (erro) {
+          console.error('Erro ao comprimir foto:', erro);
+          arquivosSelecionados.push(file); // usa o original se a compressão falhar
+        }
+      }
+
+      formNote.textContent = 'Salva direto no seu banco de dados.';
       renderPreview();
     });
 

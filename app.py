@@ -1,4 +1,5 @@
 from flask import Flask, render_template, request, jsonify
+from werkzeug.exceptions import RequestEntityTooLarge
 import psycopg2
 import os
 import base64
@@ -9,7 +10,9 @@ app = Flask(__name__)
 DATABASE_URL = os.getenv("DATABASE_URL")
 
 ALLOWED_MIMETYPES = {"image/png", "image/jpeg", "image/webp", "image/gif"}
-app.config["MAX_CONTENT_LENGTH"] = 20 * 1024 * 1024  # 20 MB por requisição (várias fotos)
+# As fotos já são comprimidas no navegador antes do envio; esse limite é só uma margem
+# de segurança pra quem tiver JavaScript desativado ou enviar via outra ferramenta.
+app.config["MAX_CONTENT_LENGTH"] = 35 * 1024 * 1024  # 35 MB por requisição
 
 
 def conectar_banco():
@@ -167,6 +170,9 @@ def api_motos():
     except psycopg2.errors.UniqueViolation:
         return jsonify({"ok": False, "erros": ["Moto já cadastrada"]}), 400
 
+    except RequestEntityTooLarge:
+        return jsonify({"ok": False, "erros": ["As fotos enviadas são muito grandes. Tente com menos fotos ou fotos menores."]}), 413
+
     except Exception as e:
         return jsonify({"ok": False, "erros": [f"Erro interno: {e}"]}), 500
 
@@ -271,6 +277,9 @@ def atualizar_moto(moto_id):
 
         return jsonify({"ok": True, "mensagem": "Moto atualizada com sucesso", "moto": moto_para_dict(moto_atualizada)})
 
+    except RequestEntityTooLarge:
+        return jsonify({"ok": False, "erros": ["As fotos enviadas são muito grandes. Tente com menos fotos ou fotos menores."]}), 413
+
     except Exception as e:
         return jsonify({"ok": False, "erros": [f"Erro interno: {e}"]}), 500
 
@@ -314,7 +323,7 @@ def deletar_moto(moto_id):
 
 @app.errorhandler(413)
 def erro_arquivo_grande(e):
-    return jsonify({"ok": False, "erros": ["Os arquivos enviados são muito grandes (limite de 20MB no total)."]}), 413
+    return jsonify({"ok": False, "erros": ["As fotos enviadas são muito grandes. Tente com menos fotos ou fotos menores."]}), 413
 
 
 @app.errorhandler(500)
