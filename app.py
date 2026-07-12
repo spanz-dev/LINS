@@ -220,30 +220,30 @@ def obter_moto(moto_id):
 
 @app.route("/api/motos/<int:moto_id>", methods=["PUT"])
 def atualizar_moto(moto_id):
-    marca = request.form.get('marca')
-    modelo = request.form.get('modelo')
-    ano = request.form.get('ano')
-    cilindrada = request.form.get('cilindrada')
-    quilometragem = request.form.get('quilometragem')
-    categoria = request.form.get('categoria')
-
-    # Fotos antigas que o usuário optou por manter (enviadas como JSON no form)
-    fotos_existentes_raw = request.form.get('fotos_existentes', '[]')
-    try:
-        fotos_existentes = json.loads(fotos_existentes_raw)
-        if not isinstance(fotos_existentes, list):
-            fotos_existentes = []
-    except (TypeError, ValueError):
-        fotos_existentes = []
-
-    arquivos_novas_fotos = request.files.getlist('fotos_novas')
-
-    if not all([marca, modelo, ano, cilindrada, quilometragem, categoria]):
-        return jsonify({"ok": False, "erros": ["Preencha todos os campos"]}), 400
-
     conexao = None
     cursor = None
     try:
+        marca = request.form.get('marca')
+        modelo = request.form.get('modelo')
+        ano = request.form.get('ano')
+        cilindrada = request.form.get('cilindrada')
+        quilometragem = request.form.get('quilometragem')
+        categoria = request.form.get('categoria')
+
+        # Fotos antigas que o usuário optou por manter (enviadas como JSON no form)
+        fotos_existentes_raw = request.form.get('fotos_existentes', '[]')
+        try:
+            fotos_existentes = json.loads(fotos_existentes_raw)
+            if not isinstance(fotos_existentes, list):
+                fotos_existentes = []
+        except (TypeError, ValueError):
+            fotos_existentes = []
+
+        arquivos_novas_fotos = request.files.getlist('fotos_novas')
+
+        if not all([marca, modelo, ano, cilindrada, quilometragem, categoria]):
+            return jsonify({"ok": False, "erros": ["Preencha todos os campos"]}), 400
+
         try:
             fotos_novas = codificar_fotos(arquivos_novas_fotos)
         except ValueError as e:
@@ -272,7 +272,7 @@ def atualizar_moto(moto_id):
         return jsonify({"ok": True, "mensagem": "Moto atualizada com sucesso", "moto": moto_para_dict(moto_atualizada)})
 
     except Exception as e:
-        return jsonify({"ok": False, "erros": [str(e)]}), 500
+        return jsonify({"ok": False, "erros": [f"Erro interno: {e}"]}), 500
 
     finally:
         if cursor:
@@ -306,6 +306,20 @@ def deletar_moto(moto_id):
             cursor.close()
         if conexao:
             conexao.close()
+
+
+# ---------------- TRATAMENTO GLOBAL DE ERROS ----------------
+# Garante que erros inesperados sempre voltem em JSON (nunca uma página HTML),
+# senão o fetch() do front-end quebra ao tentar interpretar a resposta.
+
+@app.errorhandler(413)
+def erro_arquivo_grande(e):
+    return jsonify({"ok": False, "erros": ["Os arquivos enviados são muito grandes (limite de 20MB no total)."]}), 413
+
+
+@app.errorhandler(500)
+def erro_interno(e):
+    return jsonify({"ok": False, "erros": ["Erro interno no servidor. Tente novamente."]}), 500
 
 
 if __name__ == '__main__':
