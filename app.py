@@ -1,18 +1,14 @@
 from flask import Flask, render_template, request, jsonify
 import psycopg2
 import os
-import uuid
-from werkzeug.utils import secure_filename
+import base64
 
 app = Flask(__name__)
 
 DATABASE_URL = os.getenv("DATABASE_URL")
 
-UPLOAD_FOLDER = os.path.join(app.static_folder, "uploads")
-ALLOWED_EXTENSIONS = {"png", "jpg", "jpeg", "webp", "gif"}
+ALLOWED_MIMETYPES = {"image/png", "image/jpeg", "image/webp", "image/gif"}
 app.config["MAX_CONTENT_LENGTH"] = 6 * 1024 * 1024  # 6 MB por foto
-
-os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
 
 def conectar_banco():
@@ -35,7 +31,10 @@ def criar_tabela():
         )
     """)
 
-    # Adiciona a coluna de foto sem quebrar bancos já existentes
+    # A foto fica salva como base64 direto na coluna (texto), então não depende
+    # do disco do servidor — no Render (e na maioria dos PaaS grátis) o disco é
+    # apagado a cada reinício/deploy, então guardar só o caminho do arquivo
+    # fazia a imagem "sumir" com o tempo. Guardando no Postgres, ela persiste.
     cursor.execute("""
         ALTER TABLE motos ADD COLUMN IF NOT EXISTS foto TEXT
     """)
@@ -49,27 +48,21 @@ def criar_tabela():
 criar_tabela()
 
 
-def arquivo_permitido(nome_arquivo):
-    return "." in nome_arquivo and nome_arquivo.rsplit(".", 1)[1].lower() in ALLOWED_EXTENSIONS
-
-
-def salvar_foto(arquivo):
-    """Salva o arquivo de foto no disco e devolve o nome salvo (ou None)."""
+def codificar_foto(arquivo):
+    """Lê o arquivo enviado e devolve uma data URI base64 (ou None)."""
     if not arquivo or arquivo.filename == "":
         return None
 
-    if not arquivo_permitido(arquivo.filename):
+    if arquivo.mimetype not in ALLOWED_MIMETYPES:
         raise ValueError("Formato de imagem não suportado. Use PNG, JPG, JPEG, WEBP ou GIF.")
 
-    extensao = secure_filename(arquivo.filename).rsplit(".", 1)[1].lower()
-    nome_salvo = f"{uuid.uuid4().hex}.{extensao}"
-    arquivo.save(os.path.join(UPLOAD_FOLDER, nome_salvo))
-    return nome_salvo
+    conteudo = arquivo.read()
+    base64_str = base64.b64encode(conteudo).decode("utf-8")
+    return f"data:{arquivo.mimetype};base64,{base64_str}"
 
 
 def moto_para_dict(moto):
     """moto = (id, marca, modelo, ano, cilindrada, quilometragem, categoria, foto)"""
-    foto = moto[7]
     return {
         "id": moto[0],
         "marca": moto[1],
@@ -78,7 +71,7 @@ def moto_para_dict(moto):
         "cilindrada": moto[4],
         "quilometragem": moto[5],
         "categoria": moto[6],
-        "foto": f"/static/uploads/{foto}" if foto else None
+        "foto": moto[7]  # já é a data URI base64 pronta pra usar em <img src="">
     }
 
 
@@ -118,7 +111,7 @@ def api_motos():
     cursor = None
     try:
         try:
-            nome_foto = salvar_foto(arquivo_foto)
+            foto_base64 = codificar_foto(arquivo_foto)
         except ValueError as e:
             return jsonify({"ok": False, "erros": [str(e)]}), 400
 
@@ -129,7 +122,7 @@ def api_motos():
             INSERT INTO motos (marca, modelo, ano, cilindrada, quilometragem, categoria, foto)
             VALUES (%s, %s, %s, %s, %s, %s, %s)
             RETURNING id, marca, modelo, ano, cilindrada, quilometragem, categoria, foto
-        """, (marca, modelo, ano, cilindrada, quilometragem, categoria, nome_foto))
+        """, (marca, modelo, ano, cilindrada, quilometragem, categoria, foto_base64))
 
         nova_moto = cursor.fetchone()
         conexao.commit()
@@ -198,21 +191,12 @@ def deletar_moto(moto_id):
         conexao = conectar_banco()
         cursor = conexao.cursor()
 
-        cursor.execute("SELECT foto FROM motos WHERE id = %s", (moto_id,))
-        registro = cursor.fetchone()
-
         cursor.execute("DELETE FROM motos WHERE id = %s", (moto_id,))
 
         if cursor.rowcount == 0:
             return jsonify({"ok": False, "erros": ["Moto não encontrada"]}), 404
 
         conexao.commit()
-
-        # Remove a foto do disco, se existir
-        if registro and registro[0]:
-            caminho_foto = os.path.join(UPLOAD_FOLDER, registro[0])
-            if os.path.exists(caminho_foto):
-                os.remove(caminho_foto)
 
         return jsonify({"ok": True, "mensagem": "Moto removida com sucesso"})
 
