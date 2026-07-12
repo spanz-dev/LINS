@@ -131,20 +131,20 @@ def pagina_editar():
 
 @app.route('/api/motos', methods=['POST'])
 def api_motos():
-    marca = request.form.get('marca')
-    modelo = request.form.get('modelo')
-    ano = request.form.get('ano')
-    cilindrada = request.form.get('cilindrada')
-    quilometragem = request.form.get('quilometragem')
-    categoria = request.form.get('categoria')
-    arquivos_fotos = request.files.getlist('fotos')
-
-    if not all([marca, modelo, ano, cilindrada, quilometragem, categoria]):
-        return jsonify({"ok": False, "erros": ["Preencha todos os campos"]}), 400
-
     conexao = None
     cursor = None
     try:
+        marca = request.form.get('marca')
+        modelo = request.form.get('modelo')
+        ano = request.form.get('ano')
+        cilindrada = request.form.get('cilindrada')
+        quilometragem = request.form.get('quilometragem')
+        categoria = request.form.get('categoria')
+        arquivos_fotos = request.files.getlist('fotos')
+
+        if not all([marca, modelo, ano, cilindrada, quilometragem, categoria]):
+            return jsonify({"ok": False, "erros": ["Preencha todos os campos"]}), 400
+
         try:
             fotos = codificar_fotos(arquivos_fotos)
         except ValueError as e:
@@ -168,7 +168,7 @@ def api_motos():
         return jsonify({"ok": False, "erros": ["Moto já cadastrada"]}), 400
 
     except Exception as e:
-        return jsonify({"ok": False, "erros": [str(e)]}), 500
+        return jsonify({"ok": False, "erros": [f"Erro interno: {e}"]}), 500
 
     finally:
         if cursor:
