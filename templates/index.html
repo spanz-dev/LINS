@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Garage Moto | Sua garagem</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+
+  <link rel="stylesheet" href="{{ url_for('static', filename='custom.css') }}" />
+</head>
+<body>
+  <div class="wrap">
+
+    <header class="site-header">
+      <a href="{{ url_for('html') }}" class="brand">
+        <span class="brand-mark"><span class="icon" id="brandIcon"></span></span>
+        <span class="brand-text">
+          <b>Garage Moto</b>
+          <span>Seu acervo pessoal</span>
+        </span>
+      </a>
+      <a href="{{ url_for('pagina_adicionar') }}" class="btn btn-primary">
+        <span class="icon" id="addIcon"></span> Adicionar moto
+      </a>
+    </header>
+
+    <section>
+      <span class="eyebrow">Sua garagem</span>
+      <h1 class="hero-title">Todas as suas motos,<br>numa página só.</h1>
+      <p class="hero-sub">Clique em qualquer moto para ver a ficha completa.</p>
+    </section>
+
+    <div class="search-row">
+      <span class="icon" id="searchIcon"></span>
+      <input type="text" id="search" placeholder="Buscar por marca, modelo ou categoria..." />
+    </div>
+
+    <div class="moto-grid" id="motoGrid">
+      <div class="empty-state" style="grid-column: 1/-1;">
+        <span class="icon" id="loadingIcon"></span>
+        <p>Carregando garagem...</p>
+      </div>
+    </div>
+
+  </div>
+
+  <script src="{{ url_for('static', filename='icons.js') }}"></script>
+  <script>
+    document.getElementById('brandIcon').innerHTML = Icons.brand;
+    document.getElementById('addIcon').innerHTML = Icons.plus;
+    document.getElementById('searchIcon').innerHTML = Icons.search;
+    document.getElementById('loadingIcon').innerHTML = Icons.clock;
+
+    const grid = document.getElementById('motoGrid');
+    const searchInput = document.getElementById('search');
+    let cache = [];
+
+    function render(motos) {
+      if (motos.length === 0) {
+        grid.innerHTML = `
+          <div class="empty-state" style="grid-column: 1/-1;">
+            <span class="icon">${Icons.brand}</span>
+            <p>Nenhuma moto encontrada.</p>
+            <a href="{{ url_for('pagina_adicionar') }}" class="btn btn-primary">
+              <span class="icon">${Icons.plus}</span> Adicionar moto
+            </a>
+          </div>
+        `;
+        return;
+      }
+
+      grid.innerHTML = motos.map(m => `
+        <a class="moto-card" href="/moto.html?id=${m.id}">
+          <div class="moto-photo">
+            ${m.foto
+              ? `<img src="${m.foto}" alt="${m.marca} ${m.modelo}">`
+              : `<span class="icon">${Icons.brand}</span>`}
+          </div>
+          <div class="moto-body">
+            <div class="moto-brand">${m.marca}</div>
+            <div class="moto-name">${m.modelo}</div>
+            <div class="moto-sub">${m.cilindrada} cc · ${m.categoria}</div>
+
+            <div class="stat-box">
+              <div>
+                <div class="km">${Number(m.quilometragem).toLocaleString('pt-BR')}</div>
+                <div class="km-label">KM RODADOS</div>
+              </div>
+              <div class="side">
+                <b>${m.ano}</b><br>${m.categoria}
+              </div>
+            </div>
+
+            <span class="tag">Nº ${String(m.id).padStart(4, '0')}</span>
+          </div>
+        </a>
+      `).join('');
+    }
+
+    async function carregar() {
+      try {
+        const resp = await fetch('/api/motos_cadastradas');
+        cache = await resp.json();
+        render(cache);
+      } catch (erro) {
+        grid.innerHTML = `
+          <div class="empty-state" style="grid-column: 1/-1;">
+            <span class="icon">${Icons.alertCircle}</span>
+            <p>Não foi possível carregar a garagem. Verifique se o servidor está rodando.</p>
+          </div>
+        `;
+        console.error('Erro ao carregar motos:', erro);
+      }
+    }
+
+    searchInput.addEventListener('input', () => {
+      const termo = searchInput.value.trim().toLowerCase();
+      const filtradas = cache.filter(m =>
+        m.marca.toLowerCase().includes(termo) ||
+        m.modelo.toLowerCase().includes(termo) ||
+        m.categoria.toLowerCase().includes(termo)
+      );
+      render(filtradas);
+    });
+
+    carregar();
+  </script>
+</body>
+</html>

@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Garage Moto | Detalhes</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+
+  <link rel="stylesheet" href="{{ url_for('static', filename='custom.css') }}" />
+</head>
+<body>
+  <div class="wrap">
+
+    <header class="site-header">
+      <a href="{{ url_for('html') }}" class="brand">
+        <span class="brand-mark"><span class="icon" id="brandIcon"></span></span>
+        <span class="brand-text">
+          <b>Garage Moto</b>
+          <span>Seu acervo pessoal</span>
+        </span>
+      </a>
+      <a href="{{ url_for('pagina_adicionar') }}" class="btn btn-primary">
+        <span class="icon" id="addIcon"></span> Adicionar moto
+      </a>
+    </header>
+
+    <a href="{{ url_for('html') }}" class="back-link">
+      <span class="icon" id="backIcon"></span> Voltar para a garagem
+    </a>
+
+    <div id="content">
+      <div class="empty-state">
+        <span class="icon" id="loadingIcon"></span>
+        <p>Carregando...</p>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script src="{{ url_for('static', filename='icons.js') }}"></script>
+  <script>
+    document.getElementById('brandIcon').innerHTML = Icons.brand;
+    document.getElementById('addIcon').innerHTML = Icons.plus;
+    document.getElementById('backIcon').innerHTML = Icons.chevronLeft;
+    document.getElementById('loadingIcon').innerHTML = Icons.clock;
+
+    const params = new URLSearchParams(window.location.search);
+    const id = params.get('id');
+    const content = document.getElementById('content');
+    const toast = document.getElementById('toast');
+
+    function showToast(msg) {
+      toast.textContent = msg;
+      toast.classList.add('show');
+      setTimeout(() => toast.classList.remove('show'), 2200);
+    }
+
+    function renderNaoEncontrada() {
+      content.innerHTML = `
+        <div class="empty-state">
+          <span class="icon">${Icons.alertCircle}</span>
+          <p>Essa moto não foi encontrada.</p>
+          <a href="{{ url_for('html') }}" class="btn btn-primary">Voltar para a garagem</a>
+        </div>
+      `;
+    }
+
+    function renderMoto(moto) {
+      content.innerHTML = `
+        <div class="detail-title-row">
+          <span class="eyebrow">Nº ${String(moto.id).padStart(4, '0')} · Ficha da moto</span>
+          <h1>${moto.marca} ${moto.modelo}</h1>
+          <div class="moto-sub">${moto.cilindrada} cc · ${moto.categoria}</div>
+        </div>
+
+        <div class="detail-photo">
+          ${moto.foto
+            ? `<img src="${moto.foto}" alt="${moto.marca} ${moto.modelo}">`
+            : `<span class="icon">${Icons.brand}</span>`}
+        </div>
+
+        <div class="spec-grid">
+          <div class="spec-cell">
+            <label>Ano</label>
+            <div class="val">${moto.ano}</div>
+          </div>
+          <div class="spec-cell">
+            <label>Quilometragem</label>
+            <div class="val">${Number(moto.quilometragem).toLocaleString('pt-BR')} km</div>
+          </div>
+          <div class="spec-cell">
+            <label>Cilindrada</label>
+            <div class="val">${moto.cilindrada} cc</div>
+          </div>
+          <div class="spec-cell">
+            <label>Categoria</label>
+            <div class="val">${moto.categoria}</div>
+          </div>
+        </div>
+
+        <div class="detail-actions">
+          <button class="btn btn-danger" id="removerBtn">
+            <span class="icon">${Icons.trash}</span> Remover moto
+          </button>
+        </div>
+      `;
+
+      document.getElementById('removerBtn').addEventListener('click', async () => {
+        if (!confirm('Tem certeza que deseja remover esta moto da garagem?')) return;
+
+        try {
+          const resp = await fetch(`/api/motos/${moto.id}`, { method: 'DELETE' });
+          const data = await resp.json();
+
+          if (!data.ok) {
+            alert((data.erros || ['Erro ao remover moto.']).join('\n'));
+            return;
+          }
+
+          showToast('Moto removida.');
+          setTimeout(() => window.location.href = "{{ url_for('html') }}", 600);
+        } catch (erro) {
+          console.error('Erro ao remover moto:', erro);
+          alert('Erro ao remover moto. Tente novamente.');
+        }
+      });
+    }
+
+    async function carregar() {
+      if (!id) {
+        renderNaoEncontrada();
+        return;
+      }
+
+      try {
+        const resp = await fetch(`/api/motos/${id}`);
+        if (!resp.ok) {
+          renderNaoEncontrada();
+          return;
+        }
+        const moto = await resp.json();
+        renderMoto(moto);
+      } catch (erro) {
+        console.error('Erro ao carregar moto:', erro);
+        renderNaoEncontrada();
+      }
+    }
+
+    carregar();
+  </script>
+</body>
+</html>

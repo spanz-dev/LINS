@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Garage Moto | Adicionar moto</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet" />
+
+  <link rel="stylesheet" href="{{ url_for('static', filename='custom.css') }}" />
+</head>
+<body>
+  <div class="wrap">
+
+    <header class="site-header">
+      <a href="{{ url_for('html') }}" class="brand">
+        <span class="brand-mark"><span class="icon" id="brandIcon"></span></span>
+        <span class="brand-text">
+          <b>Garage Moto</b>
+          <span>Gestão de frota</span>
+        </span>
+      </a>
+      <a href="{{ url_for('html') }}" class="btn btn-ghost">
+        <span class="icon" id="backIcon"></span> Voltar à garagem
+      </a>
+    </header>
+
+    <section style="margin-bottom: 24px;">
+      <span class="eyebrow">Nova entrada</span>
+      <h1 class="hero-title">Adicionar moto à garagem</h1>
+      <p class="hero-sub">Preencha os dados e, se quiser, adicione uma foto.</p>
+    </section>
+
+    <form id="motoForm" class="form-panel">
+
+      <div class="field">
+        <label>Foto da moto</label>
+        <div class="photo-drop" id="photoDrop">
+          <span class="icon" id="cameraIcon"></span>
+          <div class="hint">Clique ou arraste uma imagem aqui (opcional)</div>
+          <input type="file" id="fotoInput" name="foto" accept="image/*">
+        </div>
+        <div class="photo-preview" id="photoPreview">
+          <img id="photoPreviewImg" alt="Pré-visualização da foto">
+        </div>
+      </div>
+
+      <div class="field">
+        <label>Marca</label>
+        <input required type="text" name="marca" placeholder="Ex.: Honda">
+      </div>
+
+      <div class="field">
+        <label>Modelo</label>
+        <input required type="text" name="modelo" placeholder="Ex.: CB 650R">
+      </div>
+
+      <div class="field-row">
+        <div class="field">
+          <label>Ano</label>
+          <input required type="number" name="ano" min="1900" max="2100" placeholder="2024">
+        </div>
+        <div class="field">
+          <label>Cilindrada (cc)</label>
+          <input required type="number" name="cilindrada" min="1" placeholder="649">
+        </div>
+      </div>
+
+      <div class="field-row">
+        <div class="field">
+          <label>Quilometragem</label>
+          <input required type="number" name="quilometragem" min="0" placeholder="0">
+        </div>
+        <div class="field">
+          <label>Categoria</label>
+          <select name="categoria">
+            <option>Naked</option>
+            <option>Esportiva</option>
+            <option>Trail</option>
+            <option>Custom</option>
+            <option>Scooter</option>
+            <option>Street</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-submit-row">
+        <button type="submit" class="btn btn-primary" id="submitBtn">
+          <span class="icon" id="submitIcon"></span> Adicionar à garagem
+        </button>
+        <span class="form-note" id="formNote">Salva direto no seu banco de dados.</span>
+      </div>
+    </form>
+
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script src="{{ url_for('static', filename='icons.js') }}"></script>
+  <script>
+    document.getElementById('brandIcon').innerHTML = Icons.brand;
+    document.getElementById('backIcon').innerHTML = Icons.chevronLeft;
+    document.getElementById('cameraIcon').innerHTML = Icons.camera;
+    document.getElementById('submitIcon').innerHTML = Icons.plus;
+
+    const form = document.getElementById('motoForm');
+    const fotoInput = document.getElementById('fotoInput');
+    const photoPreview = document.getElementById('photoPreview');
+    const photoPreviewImg = document.getElementById('photoPreviewImg');
+    const toast = document.getElementById('toast');
+    const submitBtn = document.getElementById('submitBtn');
+    const formNote = document.getElementById('formNote');
+
+    function showToast(msg) {
+      toast.textContent = msg;
+      toast.classList.add('show');
+      setTimeout(() => toast.classList.remove('show'), 2200);
+    }
+
+    fotoInput.addEventListener('change', () => {
+      const file = fotoInput.files[0];
+      if (!file) {
+        photoPreview.style.display = 'none';
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onload = () => {
+        photoPreviewImg.src = reader.result;
+        photoPreview.style.display = 'block';
+      };
+      reader.readAsDataURL(file);
+    });
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      submitBtn.disabled = true;
+      formNote.textContent = 'Enviando...';
+
+      const formData = new FormData(form);
+
+      try {
+        const resp = await fetch('/api/motos', {
+          method: 'POST',
+          body: formData
+        });
+
+        const data = await resp.json();
+
+        if (!data.ok) {
+          alert((data.erros || ['Erro ao cadastrar moto.']).join('\n'));
+          submitBtn.disabled = false;
+          formNote.textContent = 'Salva direto no seu banco de dados.';
+          return;
+        }
+
+        showToast('Moto adicionada à garagem!');
+        setTimeout(() => window.location.href = `/moto.html?id=${data.moto.id}`, 500);
+      } catch (erro) {
+        console.error('Erro ao cadastrar moto:', erro);
+        alert('Erro ao cadastrar moto. Verifique se o servidor está rodando e tente novamente.');
+        submitBtn.disabled = false;
+        formNote.textContent = 'Salva direto no seu banco de dados.';
+      }
+    });
+  </script>
+</body>
+</html>
