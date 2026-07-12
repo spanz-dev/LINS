@@ -12,9 +12,9 @@
   <link rel="stylesheet" href="{{ url_for('static', filename='custom.css') }}" />
 </head>
 <body>
-  <div class="wrap">
 
-    <header class="site-header">
+  <nav class="navbar">
+    <div class="navbar-inner">
       <a href="{{ url_for('html') }}" class="brand">
         <span class="brand-mark"><span class="icon" id="brandIcon"></span></span>
         <span class="brand-text">
@@ -22,21 +22,28 @@
           <span>Seu acervo pessoal</span>
         </span>
       </a>
-      <a href="{{ url_for('pagina_adicionar') }}" class="btn btn-primary">
-        <span class="icon" id="addIcon"></span> Adicionar moto
-      </a>
-    </header>
-
-    <section>
-      <span class="eyebrow">Sua garagem</span>
-      <h1 class="hero-title">Todas as suas motos,<br>numa página só.</h1>
-      <p class="hero-sub">Clique em qualquer moto para ver a ficha completa.</p>
-    </section>
-
-    <div class="search-row">
-      <span class="icon" id="searchIcon"></span>
-      <input type="text" id="search" placeholder="Buscar por marca, modelo ou categoria..." />
+      <div class="navbar-nav">
+        <a href="{{ url_for('html') }}" class="nav-link active">
+          <span class="icon" id="navMotoIcon"></span> Motos
+        </a>
+        <a href="{{ url_for('pagina_adicionar') }}" class="nav-link nav-cta">
+          <span class="icon" id="navAddIcon"></span> Adicionar moto
+        </a>
+      </div>
     </div>
+  </nav>
+
+  <div class="wrap">
+
+    <section class="search-hero">
+      <span class="eyebrow">Sua garagem</span>
+      <h1 class="search-hero-title">Motos cadastradas <span class="count" id="motoCount"></span></h1>
+
+      <div class="search-bar">
+        <input type="text" id="search" placeholder="Buscar por marca, modelo ou categoria..." />
+        <button class="search-btn" type="button" tabindex="-1"><span class="icon" id="searchIcon"></span></button>
+      </div>
+    </section>
 
     <div class="moto-grid" id="motoGrid">
       <div class="empty-state" style="grid-column: 1/-1;">
@@ -50,12 +57,14 @@
   <script src="{{ url_for('static', filename='icons.js') }}"></script>
   <script>
     document.getElementById('brandIcon').innerHTML = Icons.brand;
-    document.getElementById('addIcon').innerHTML = Icons.plus;
+    document.getElementById('navMotoIcon').innerHTML = Icons.brand;
+    document.getElementById('navAddIcon').innerHTML = Icons.plus;
     document.getElementById('searchIcon').innerHTML = Icons.search;
     document.getElementById('loadingIcon').innerHTML = Icons.clock;
 
     const grid = document.getElementById('motoGrid');
     const searchInput = document.getElementById('search');
+    const motoCount = document.getElementById('motoCount');
     let cache = [];
 
     function render(motos) {
@@ -72,12 +81,16 @@
         return;
       }
 
-      grid.innerHTML = motos.map(m => `
+      grid.innerHTML = motos.map(m => {
+        const foto = m.fotos && m.fotos.length ? m.fotos[0] : null;
+        const totalFotos = m.fotos ? m.fotos.length : 0;
+        return `
         <a class="moto-card" href="/moto.html?id=${m.id}">
           <div class="moto-photo">
-            ${m.foto
-              ? `<img src="${m.foto}" alt="${m.marca} ${m.modelo}">`
+            ${foto
+              ? `<img src="${foto}" alt="${m.marca} ${m.modelo}">`
               : `<span class="icon">${Icons.brand}</span>`}
+            ${totalFotos > 1 ? `<span class="photo-count">1/${totalFotos}</span>` : ''}
           </div>
           <div class="moto-body">
             <div class="moto-brand">${m.marca}</div>
@@ -97,13 +110,14 @@
             <span class="tag">Nº ${String(m.id).padStart(4, '0')}</span>
           </div>
         </a>
-      `).join('');
+      `}).join('');
     }
 
     async function carregar() {
       try {
         const resp = await fetch('/api/motos_cadastradas');
         cache = await resp.json();
+        motoCount.textContent = `(${cache.length})`;
         render(cache);
       } catch (erro) {
         grid.innerHTML = `

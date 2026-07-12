@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Garage Moto | Editar moto</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+
+  <link rel="stylesheet" href="{{ url_for('static', filename='custom.css') }}" />
+</head>
+<body>
+
+  <nav class="navbar">
+    <div class="navbar-inner">
+      <a href="{{ url_for('html') }}" class="brand">
+        <span class="brand-mark"><span class="icon" id="brandIcon"></span></span>
+        <span class="brand-text">
+          <b>Garage Moto</b>
+          <span>Seu acervo pessoal</span>
+        </span>
+      </a>
+      <div class="navbar-nav">
+        <a href="{{ url_for('html') }}" class="nav-link">
+          <span class="icon" id="navMotoIcon"></span> Motos
+        </a>
+        <a href="{{ url_for('pagina_adicionar') }}" class="nav-link nav-cta">
+          <span class="icon" id="navAddIcon"></span> Adicionar moto
+        </a>
+      </div>
+    </div>
+  </nav>
+
+  <div class="wrap">
+
+    <a href="#" id="backLink" class="back-link">
+      <span class="icon" id="backIcon"></span> Voltar para a ficha
+    </a>
+
+    <section class="search-hero" style="padding-bottom: 4px;">
+      <span class="eyebrow">Editar</span>
+      <h1 class="search-hero-title" id="pageTitle">Editar moto</h1>
+    </section>
+
+    <div id="formWrap">
+      <div class="empty-state">
+        <span class="icon" id="loadingIcon"></span>
+        <p>Carregando dados da moto...</p>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script src="{{ url_for('static', filename='icons.js') }}"></script>
+  <script>
+    document.getElementById('brandIcon').innerHTML = Icons.brand;
+    document.getElementById('navMotoIcon').innerHTML = Icons.brand;
+    document.getElementById('navAddIcon').innerHTML = Icons.plus;
+    document.getElementById('backIcon').innerHTML = Icons.chevronLeft;
+    document.getElementById('loadingIcon').innerHTML = Icons.clock;
+
+    const params = new URLSearchParams(window.location.search);
+    const id = params.get('id');
+    const formWrap = document.getElementById('formWrap');
+    const toast = document.getElementById('toast');
+
+    document.getElementById('backLink').href = `/moto.html?id=${id}`;
+
+    function showToast(msg) {
+      toast.textContent = msg;
+      toast.classList.add('show');
+      setTimeout(() => toast.classList.remove('show'), 2200);
+    }
+
+    const CATEGORIAS = ['Naked', 'Esportiva', 'Trail', 'Custom', 'Scooter', 'Street'];
+
+    let fotosExistentes = [];
+    let novosArquivos = [];
+
+    function renderForm(moto) {
+      document.getElementById('pageTitle').textContent = `Editar ${moto.marca} ${moto.modelo}`;
+      fotosExistentes = moto.fotos ? [...moto.fotos] : [];
+
+      formWrap.innerHTML = `
+        <form id="motoForm" class="form-panel">
+
+          <div class="field">
+            <label>Fotos da moto</label>
+            <div class="photo-grid" id="photoGrid"></div>
+            <div class="photo-drop" id="photoDrop" style="margin-top: 12px;">
+              <span class="icon">${Icons.camera}</span>
+              <div class="hint">Clique ou arraste pra adicionar mais fotos</div>
+              <input type="file" id="fotoInput" accept="image/*" multiple>
+            </div>
+          </div>
+
+          <div class="field">
+            <label>Marca</label>
+            <input required type="text" name="marca" value="${moto.marca}">
+          </div>
+
+          <div class="field">
+            <label>Modelo</label>
+            <input required type="text" name="modelo" value="${moto.modelo}">
+          </div>
+
+          <div class="field-row">
+            <div class="field">
+              <label>Ano</label>
+              <input required type="number" name="ano" min="1900" max="2100" value="${moto.ano}">
+            </div>
+            <div class="field">
+              <label>Cilindrada (cc)</label>
+              <input required type="number" name="cilindrada" min="1" value="${moto.cilindrada}">
+            </div>
+          </div>
+
+          <div class="field-row">
+            <div class="field">
+              <label>Quilometragem</label>
+              <input required type="number" name="quilometragem" min="0" value="${moto.quilometragem}">
+            </div>
+            <div class="field">
+              <label>Categoria</label>
+              <select name="categoria">
+                ${CATEGORIAS.map(c => `<option ${c === moto.categoria ? 'selected' : ''}>${c}</option>`).join('')}
+              </select>
+            </div>
+          </div>
+
+          <div class="form-submit-row">
+            <button type="submit" class="btn btn-primary" id="submitBtn">
+              <span class="icon">${Icons.edit}</span> Salvar alterações
+            </button>
+            <span class="form-note" id="formNote">As alterações são salvas no seu banco de dados.</span>
+          </div>
+        </form>
+      `;
+
+      renderPhotoGrid();
+
+      document.getElementById('fotoInput').addEventListener('change', (e) => {
+        novosArquivos = novosArquivos.concat(Array.from(e.target.files));
+        e.target.value = '';
+        renderPhotoGrid();
+      });
+
+      document.getElementById('motoForm').addEventListener('submit', enviarFormulario);
+    }
+
+    function renderPhotoGrid() {
+      const grid = document.getElementById('photoGrid');
+
+      const existentesHtml = fotosExistentes.map((f, i) => `
+        <div class="photo-tile">
+          <img src="${f}" alt="Foto ${i + 1}">
+          <button type="button" class="remove-tile" data-tipo="existente" data-i="${i}">${Icons.close}</button>
+          ${i === 0 ? '<span class="tile-badge">Capa</span>' : ''}
+        </div>
+      `).join('');
+
+      const novasHtml = novosArquivos.map((file, i) => `
+        <div class="photo-tile">
+          <img src="${URL.createObjectURL(file)}" alt="Nova foto ${i + 1}">
+          <button type="button" class="remove-tile" data-tipo="nova" data-i="${i}">${Icons.close}</button>
+          <span class="tile-badge">Nova</span>
+        </div>
+      `).join('');
+
+      grid.innerHTML = existentesHtml + novasHtml;
+
+      grid.querySelectorAll('.remove-tile').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const i = Number(btn.dataset.i);
+          if (btn.dataset.tipo === 'existente') {
+            fotosExistentes.splice(i, 1);
+          } else {
+            novosArquivos.splice(i, 1);
+          }
+          renderPhotoGrid();
+        });
+      });
+    }
+
+    async function enviarFormulario(e) {
+      e.preventDefault();
+
+      const submitBtn = document.getElementById('submitBtn');
+      const formNote = document.getElementById('formNote');
+      submitBtn.disabled = true;
+      formNote.textContent = 'Salvando...';
+
+      const formData = new FormData(e.target);
+      formData.append('fotos_existentes', JSON.stringify(fotosExistentes));
+      novosArquivos.forEach(file => formData.append('fotos_novas', file));
+
+      try {
+        const resp = await fetch(`/api/motos/${id}`, {
+          method: 'PUT',
+          body: formData
+        });
+
+        const data = await resp.json();
+
+        if (!data.ok) {
+          alert((data.erros || ['Erro ao salvar alterações.']).join('\n'));
+          submitBtn.disabled = false;
+          formNote.textContent = 'As alterações são salvas no seu banco de dados.';
+          return;
+        }
+
+        showToast('Moto atualizada!');
+        setTimeout(() => window.location.href = `/moto.html?id=${id}`, 500);
+      } catch (erro) {
+        console.error('Erro ao atualizar moto:', erro);
+        alert('Erro ao salvar alterações. Tente novamente.');
+        submitBtn.disabled = false;
+        formNote.textContent = 'As alterações são salvas no seu banco de dados.';
+      }
+    }
+
+    async function carregar() {
+      if (!id) {
+        formWrap.innerHTML = `<div class="empty-state"><p>Moto não especificada.</p></div>`;
+        return;
+      }
+
+      try {
+        const resp = await fetch(`/api/motos/${id}`);
+        if (!resp.ok) {
+          formWrap.innerHTML = `<div class="empty-state"><p>Essa moto não foi encontrada.</p></div>`;
+          return;
+        }
+        const moto = await resp.json();
+        renderForm(moto);
+      } catch (erro) {
+        console.error('Erro ao carregar moto:', erro);
+        formWrap.innerHTML = `<div class="empty-state"><p>Erro ao carregar dados da moto.</p></div>`;
+      }
+    }
+
+    carregar();
+  </script>
+</body>
+</html>

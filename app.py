@@ -2,13 +2,14 @@ from flask import Flask, render_template, request, jsonify
 import psycopg2
 import os
 import base64
+import json
 
 app = Flask(__name__)
 
 DATABASE_URL = os.getenv("DATABASE_URL")
 
 ALLOWED_MIMETYPES = {"image/png", "image/jpeg", "image/webp", "image/gif"}
-app.config["MAX_CONTENT_LENGTH"] = 6 * 1024 * 1024  # 6 MB por foto
+app.config["MAX_CONTENT_LENGTH"] = 20 * 1024 * 1024  # 20 MB por requisição (várias fotos)
 
 
 def conectar_banco():
@@ -31,13 +32,26 @@ def criar_tabela():
         )
     """)
 
-    # A foto fica salva como base64 direto na coluna (texto), então não depende
-    # do disco do servidor — no Render (e na maioria dos PaaS grátis) o disco é
-    # apagado a cada reinício/deploy, então guardar só o caminho do arquivo
-    # fazia a imagem "sumir" com o tempo. Guardando no Postgres, ela persiste.
+    # 'fotos' guarda uma lista JSON de imagens em base64 (permite várias fotos por moto).
+    # Tudo fica no Postgres (nada em disco), então sobrevive a reinícios/deploys no Render.
+    cursor.execute("ALTER TABLE motos ADD COLUMN IF NOT EXISTS fotos TEXT")
+
+    # Migração: bancos antigos tinham uma coluna 'foto' única (uma imagem só).
+    # Se existir, movemos esse valor pra dentro de 'fotos' como lista de 1 item.
     cursor.execute("""
-        ALTER TABLE motos ADD COLUMN IF NOT EXISTS foto TEXT
+        SELECT column_name FROM information_schema.columns
+        WHERE table_name = 'motos' AND column_name = 'foto'
     """)
+    tem_coluna_antiga = cursor.fetchone() is not None
+
+    if tem_coluna_antiga:
+        cursor.execute("SELECT id, foto FROM motos WHERE foto IS NOT NULL AND fotos IS NULL")
+        antigas = cursor.fetchall()
+        for moto_id, foto in antigas:
+            cursor.execute(
+                "UPDATE motos SET fotos = %s WHERE id = %s",
+                (json.dumps([foto]), moto_id)
+            )
 
     conexao.commit()
     cursor.close()
@@ -49,7 +63,7 @@ criar_tabela()
 
 
 def codificar_foto(arquivo):
-    """Lê o arquivo enviado e devolve uma data URI base64 (ou None)."""
+    """Lê um arquivo enviado e devolve uma data URI base64 (ou None)."""
     if not arquivo or arquivo.filename == "":
         return None
 
@@ -61,8 +75,24 @@ def codificar_foto(arquivo):
     return f"data:{arquivo.mimetype};base64,{base64_str}"
 
 
+def codificar_fotos(arquivos):
+    """Codifica uma lista de arquivos enviados, ignorando os vazios."""
+    fotos = []
+    for arquivo in arquivos:
+        codificada = codificar_foto(arquivo)
+        if codificada:
+            fotos.append(codificada)
+    return fotos
+
+
 def moto_para_dict(moto):
-    """moto = (id, marca, modelo, ano, cilindrada, quilometragem, categoria, foto)"""
+    """moto = (id, marca, modelo, ano, cilindrada, quilometragem, categoria, fotos_json)"""
+    fotos_json = moto[7]
+    try:
+        fotos = json.loads(fotos_json) if fotos_json else []
+    except (TypeError, ValueError):
+        fotos = []
+
     return {
         "id": moto[0],
         "marca": moto[1],
@@ -71,7 +101,7 @@ def moto_para_dict(moto):
         "cilindrada": moto[4],
         "quilometragem": moto[5],
         "categoria": moto[6],
-        "foto": moto[7]  # já é a data URI base64 pronta pra usar em <img src="">
+        "fotos": fotos
     }
 
 
@@ -92,6 +122,11 @@ def pagina_adicionar():
     return render_template("adicionar.html")
 
 
+@app.route('/editar.html')
+def pagina_editar():
+    return render_template("editar.html")
+
+
 # ---------------- API ----------------
 
 @app.route('/api/motos', methods=['POST'])
@@ -102,7 +137,7 @@ def api_motos():
     cilindrada = request.form.get('cilindrada')
     quilometragem = request.form.get('quilometragem')
     categoria = request.form.get('categoria')
-    arquivo_foto = request.files.get('foto')
+    arquivos_fotos = request.files.getlist('fotos')
 
     if not all([marca, modelo, ano, cilindrada, quilometragem, categoria]):
         return jsonify({"ok": False, "erros": ["Preencha todos os campos"]}), 400
@@ -111,7 +146,7 @@ def api_motos():
     cursor = None
     try:
         try:
-            foto_base64 = codificar_foto(arquivo_foto)
+            fotos = codificar_fotos(arquivos_fotos)
         except ValueError as e:
             return jsonify({"ok": False, "erros": [str(e)]}), 400
 
@@ -119,10 +154,10 @@ def api_motos():
         cursor = conexao.cursor()
 
         cursor.execute("""
-            INSERT INTO motos (marca, modelo, ano, cilindrada, quilometragem, categoria, foto)
+            INSERT INTO motos (marca, modelo, ano, cilindrada, quilometragem, categoria, fotos)
             VALUES (%s, %s, %s, %s, %s, %s, %s)
-            RETURNING id, marca, modelo, ano, cilindrada, quilometragem, categoria, foto
-        """, (marca, modelo, ano, cilindrada, quilometragem, categoria, foto_base64))
+            RETURNING id, marca, modelo, ano, cilindrada, quilometragem, categoria, fotos
+        """, (marca, modelo, ano, cilindrada, quilometragem, categoria, json.dumps(fotos)))
 
         nova_moto = cursor.fetchone()
         conexao.commit()
@@ -148,7 +183,7 @@ def listar_motos():
     cursor = conexao.cursor()
 
     cursor.execute("""
-        SELECT id, marca, modelo, ano, cilindrada, quilometragem, categoria, foto
+        SELECT id, marca, modelo, ano, cilindrada, quilometragem, categoria, fotos
         FROM motos
         ORDER BY id DESC
     """)
@@ -167,7 +202,7 @@ def obter_moto(moto_id):
     cursor = conexao.cursor()
 
     cursor.execute("""
-        SELECT id, marca, modelo, ano, cilindrada, quilometragem, categoria, foto
+        SELECT id, marca, modelo, ano, cilindrada, quilometragem, categoria, fotos
         FROM motos
         WHERE id = %s
     """, (moto_id,))
@@ -181,6 +216,69 @@ def obter_moto(moto_id):
         return jsonify({"ok": False, "erros": ["Moto não encontrada"]}), 404
 
     return jsonify(moto_para_dict(moto))
+
+
+@app.route("/api/motos/<int:moto_id>", methods=["PUT"])
+def atualizar_moto(moto_id):
+    marca = request.form.get('marca')
+    modelo = request.form.get('modelo')
+    ano = request.form.get('ano')
+    cilindrada = request.form.get('cilindrada')
+    quilometragem = request.form.get('quilometragem')
+    categoria = request.form.get('categoria')
+
+    # Fotos antigas que o usuário optou por manter (enviadas como JSON no form)
+    fotos_existentes_raw = request.form.get('fotos_existentes', '[]')
+    try:
+        fotos_existentes = json.loads(fotos_existentes_raw)
+        if not isinstance(fotos_existentes, list):
+            fotos_existentes = []
+    except (TypeError, ValueError):
+        fotos_existentes = []
+
+    arquivos_novas_fotos = request.files.getlist('fotos_novas')
+
+    if not all([marca, modelo, ano, cilindrada, quilometragem, categoria]):
+        return jsonify({"ok": False, "erros": ["Preencha todos os campos"]}), 400
+
+    conexao = None
+    cursor = None
+    try:
+        try:
+            fotos_novas = codificar_fotos(arquivos_novas_fotos)
+        except ValueError as e:
+            return jsonify({"ok": False, "erros": [str(e)]}), 400
+
+        fotos_final = fotos_existentes + fotos_novas
+
+        conexao = conectar_banco()
+        cursor = conexao.cursor()
+
+        cursor.execute("""
+            UPDATE motos
+            SET marca = %s, modelo = %s, ano = %s, cilindrada = %s,
+                quilometragem = %s, categoria = %s, fotos = %s
+            WHERE id = %s
+            RETURNING id, marca, modelo, ano, cilindrada, quilometragem, categoria, fotos
+        """, (marca, modelo, ano, cilindrada, quilometragem, categoria, json.dumps(fotos_final), moto_id))
+
+        moto_atualizada = cursor.fetchone()
+
+        if not moto_atualizada:
+            return jsonify({"ok": False, "erros": ["Moto não encontrada"]}), 404
+
+        conexao.commit()
+
+        return jsonify({"ok": True, "mensagem": "Moto atualizada com sucesso", "moto": moto_para_dict(moto_atualizada)})
+
+    except Exception as e:
+        return jsonify({"ok": False, "erros": [str(e)]}), 500
+
+    finally:
+        if cursor:
+            cursor.close()
+        if conexao:
+            conexao.close()
 
 
 @app.route("/api/motos/<int:moto_id>", methods=["DELETE"])

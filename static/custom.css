@@ -1,7 +1,5 @@
 /* ============================================================
-   GARAGE MOTO — tema claro, estilo "ficha de veículo"
-   Inspirado em portais de veículos: cards brancos, fundo cinza-claro,
-   caixas de destaque para os dados. Sem elementos de "vendedor".
+   GARAGE MOTO — navbar escura, busca em destaque, galeria de fotos
    ============================================================ */
 
 :root {
@@ -11,8 +9,14 @@
   --border: #e3e5e9;
   --border-strong: #d3d6dc;
 
+  --navbar-bg: #14161a;
+  --navbar-text: #e7e8ea;
+  --navbar-text-dim: #9a9ea6;
+
   --accent: #f4b400;
   --accent-dark: #171819;
+  --cta: #e14b3f;
+  --cta-dark: #c33d33;
 
   --danger: #c33d3d;
   --danger-soft: #fbeaea;
@@ -39,25 +43,26 @@ html, body {
 
 .mono { font-family: 'DM Mono', monospace; }
 
-.wrap {
-  max-width: 1320px;
-  margin: 0 auto;
-  padding: 28px 24px 64px;
-}
+.wrap { max-width: 1320px; margin: 0 auto; padding: 28px 24px 64px; }
 
 .icon { display: inline-flex; width: 1em; height: 1em; }
 .icon svg { width: 100%; height: 100%; }
 
-/* ---------- HEADER ---------- */
+/* ---------- NAVBAR (largura total, fundo escuro) ---------- */
 
-.site-header {
+.navbar {
+  background: var(--navbar-bg);
+  border-bottom: 1px solid #24262c;
+}
+
+.navbar-inner {
+  max-width: 1320px;
+  margin: 0 auto;
+  padding: 14px 24px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 16px;
-  padding: 4px 0 22px;
-  margin-bottom: 24px;
-  border-bottom: 1px solid var(--border);
+  gap: 20px;
 }
 
 .brand {
@@ -65,25 +70,57 @@ html, body {
   align-items: center;
   gap: 10px;
   text-decoration: none;
-  color: var(--text);
+  color: var(--navbar-text);
 }
 
 .brand-mark {
-  width: 36px;
-  height: 36px;
-  border-radius: 9px;
-  background: var(--accent-dark);
-  color: #fff;
+  width: 34px;
+  height: 34px;
+  border-radius: 8px;
+  background: #22242b;
+  color: var(--accent);
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
-.brand-mark .icon { font-size: 18px; }
+.brand-mark .icon { font-size: 17px; }
 
-.brand-text { display: flex; flex-direction: column; line-height: 1.2; }
-.brand-text b { font-size: 15px; font-weight: 800; }
-.brand-text span { font-size: 11px; color: var(--text-faint); }
+.brand-text { display: flex; flex-direction: column; line-height: 1.15; }
+.brand-text b { font-size: 14.5px; font-weight: 800; color: #fff; }
+.brand-text span { font-size: 10.5px; color: var(--navbar-text-dim); }
+
+.navbar-nav {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.nav-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 9px 15px;
+  border-radius: 999px;
+  color: var(--navbar-text-dim);
+  text-decoration: none;
+  font-size: 13.5px;
+  font-weight: 600;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.nav-link .icon { font-size: 15px; }
+.nav-link:hover { color: #fff; background: rgba(255,255,255,0.06); }
+.nav-link.active { color: #fff; background: rgba(255,255,255,0.08); }
+
+.nav-link.nav-cta {
+  background: var(--cta);
+  color: #fff;
+  font-weight: 700;
+}
+.nav-link.nav-cta:hover { background: var(--cta-dark); }
+
+/* ---------- BOTÕES GERAIS ---------- */
 
 .btn {
   display: inline-flex;
@@ -113,7 +150,9 @@ html, body {
 
 .btn:active { transform: scale(0.98); }
 
-/* ---------- HERO / EYEBROW ---------- */
+/* ---------- BUSCA EM DESTAQUE (topo da lista) ---------- */
+
+.search-hero { padding: 30px 0 26px; }
 
 .eyebrow {
   display: inline-flex;
@@ -134,45 +173,53 @@ html, body {
   background: var(--accent);
 }
 
-.hero-title {
-  font-size: clamp(24px, 3vw, 32px);
+.search-hero-title {
+  font-size: clamp(20px, 2.6vw, 26px);
   font-weight: 800;
-  line-height: 1.25;
-  margin: 10px 0 6px;
-  letter-spacing: -0.01em;
+  margin: 8px 0 16px;
 }
 
-.hero-sub { color: var(--text-dim); font-size: 14.5px; max-width: 52ch; margin: 0; }
+.search-hero-title .count { color: var(--text-faint); font-weight: 600; }
 
-/* ---------- SEARCH ---------- */
-
-.search-row { margin: 22px 0 20px; position: relative; }
-
-.search-row .icon {
-  position: absolute;
-  left: 15px;
-  top: 50%;
-  transform: translateY(-50%);
-  color: var(--text-faint);
-  font-size: 16px;
-  pointer-events: none;
-}
-
-.search-row input {
-  width: 100%;
+.search-bar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
   background: var(--card-bg);
   border: 1px solid var(--border-strong);
   border-radius: 999px;
-  padding: 12px 16px 12px 42px;
-  color: var(--text);
-  font-family: 'Manrope', sans-serif;
-  font-size: 14px;
-  outline: none;
-  transition: border-color 0.15s ease;
+  padding: 6px 6px 6px 20px;
+  box-shadow: var(--shadow-card);
+  max-width: 620px;
 }
 
-.search-row input:focus { border-color: var(--accent-dark); }
-.search-row input::placeholder { color: var(--text-faint); }
+.search-bar input {
+  flex: 1;
+  border: none;
+  outline: none;
+  background: transparent;
+  font-family: 'Manrope', sans-serif;
+  font-size: 14.5px;
+  color: var(--text);
+  padding: 10px 0;
+}
+
+.search-bar input::placeholder { color: var(--text-faint); }
+
+.search-bar .search-btn {
+  width: 40px;
+  height: 40px;
+  min-width: 40px;
+  border-radius: 50%;
+  background: var(--cta);
+  color: #fff;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 17px;
+}
 
 /* ---------- GRID DE CARDS ---------- */
 
@@ -194,10 +241,7 @@ html, body {
   transition: transform 0.15s ease, box-shadow 0.15s ease;
 }
 
-.moto-card:hover {
-  transform: translateY(-3px);
-  box-shadow: var(--shadow);
-}
+.moto-card:hover { transform: translateY(-3px); box-shadow: var(--shadow); }
 
 .moto-photo {
   width: 100%;
@@ -208,30 +252,29 @@ html, body {
   justify-content: center;
   overflow: hidden;
   color: var(--text-faint);
+  position: relative;
 }
 
 .moto-photo img { width: 100%; height: 100%; object-fit: cover; }
 .moto-photo .icon { font-size: 34px; }
 
+.moto-photo .photo-count {
+  position: absolute;
+  bottom: 8px;
+  right: 8px;
+  background: rgba(20,22,26,0.72);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 3px 9px;
+  border-radius: 999px;
+}
+
 .moto-body { padding: 18px 20px 20px; }
 
-.moto-brand {
-  font-size: 13.5px;
-  color: var(--text-dim);
-  margin-bottom: 2px;
-}
-
-.moto-name {
-  font-weight: 800;
-  font-size: 20px;
-  margin-bottom: 4px;
-}
-
-.moto-sub {
-  font-size: 13.5px;
-  color: var(--text-faint);
-  margin-bottom: 14px;
-}
+.moto-brand { font-size: 13.5px; color: var(--text-dim); margin-bottom: 2px; }
+.moto-name { font-weight: 800; font-size: 20px; margin-bottom: 4px; }
+.moto-sub { font-size: 13.5px; color: var(--text-faint); margin-bottom: 14px; }
 
 .stat-box {
   display: flex;
@@ -245,26 +288,9 @@ html, body {
   margin-bottom: 14px;
 }
 
-.stat-box .km {
-  font-size: 23px;
-  font-weight: 800;
-  color: var(--text);
-  font-family: 'DM Mono', monospace;
-}
-
-.stat-box .km-label {
-  font-size: 11px;
-  color: var(--text-faint);
-  font-weight: 600;
-}
-
-.stat-box .side {
-  text-align: right;
-  font-size: 13.5px;
-  color: var(--text-dim);
-  line-height: 1.4;
-}
-
+.stat-box .km { font-size: 23px; font-weight: 800; color: var(--text); font-family: 'DM Mono', monospace; }
+.stat-box .km-label { font-size: 11px; color: var(--text-faint); font-weight: 600; }
+.stat-box .side { text-align: right; font-size: 13.5px; color: var(--text-dim); line-height: 1.4; }
 .stat-box .side b { color: var(--text); font-weight: 700; }
 
 .tag {
@@ -309,24 +335,26 @@ html, body {
 .back-link .icon { font-size: 15px; }
 .back-link:hover { color: var(--text); }
 
-.detail-title-row {
-  margin-bottom: 18px;
+.detail-title-row { margin-bottom: 18px; }
+.detail-title-row h1 { font-size: clamp(22px, 3vw, 28px); font-weight: 800; margin: 8px 0 3px; }
+.detail-title-row .moto-sub { font-size: 13.5px; margin-bottom: 0; }
+
+/* Galeria: foto grande + miniaturas */
+
+.gallery-layout {
+  display: flex;
+  gap: 14px;
+  margin-bottom: 20px;
 }
 
-.detail-title-row h1 {
-  font-size: clamp(22px, 3vw, 28px);
-  font-weight: 800;
-  margin: 8px 0 3px;
+@media (max-width: 700px) {
+  .gallery-layout { flex-direction: column-reverse; }
 }
 
-.detail-title-row .moto-sub {
-  font-size: 13.5px;
-  margin-bottom: 0;
-}
-
-.detail-photo {
-  width: 100%;
-  aspect-ratio: 16 / 9;
+.gallery-main {
+  flex: 1;
+  position: relative;
+  aspect-ratio: 16 / 10;
   border-radius: var(--radius);
   background: var(--box-bg);
   border: 1px solid var(--border);
@@ -335,11 +363,60 @@ html, body {
   align-items: center;
   justify-content: center;
   color: var(--text-faint);
-  margin-bottom: 20px;
 }
 
-.detail-photo img { width: 100%; height: 100%; object-fit: cover; }
-.detail-photo .icon { font-size: 60px; }
+.gallery-main img { width: 100%; height: 100%; object-fit: cover; }
+.gallery-main .icon { font-size: 60px; }
+
+.gallery-nav-btn {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: var(--cta);
+  color: #fff;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 17px;
+  box-shadow: 0 4px 12px -4px rgba(0,0,0,0.4);
+}
+
+.gallery-nav-btn.prev { left: 12px; }
+.gallery-nav-btn.next { right: 12px; }
+.gallery-nav-btn:hover { background: var(--cta-dark); }
+
+.gallery-thumbs {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 96px;
+  overflow-y: auto;
+  max-height: none;
+}
+
+@media (max-width: 700px) {
+  .gallery-thumbs { flex-direction: row; width: auto; overflow-x: auto; overflow-y: visible; }
+}
+
+.gallery-thumb {
+  width: 96px;
+  height: 72px;
+  min-height: 72px;
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  border: 2px solid transparent;
+  cursor: pointer;
+  background: var(--box-bg);
+  flex-shrink: 0;
+}
+
+.gallery-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.gallery-thumb.active { border-color: var(--accent); }
 
 .spec-grid {
   display: grid;
@@ -352,9 +429,7 @@ html, body {
   margin-bottom: 24px;
 }
 
-@media (max-width: 700px) {
-  .spec-grid { grid-template-columns: repeat(2, 1fr); }
-}
+@media (max-width: 700px) { .spec-grid { grid-template-columns: repeat(2, 1fr); } }
 
 .spec-cell { background: var(--box-bg); padding: 15px 16px; }
 
@@ -372,26 +447,20 @@ html, body {
 
 .detail-actions { display: flex; gap: 10px; flex-wrap: wrap; }
 
-/* ---------- FORMULÁRIO (ADICIONAR) ---------- */
+/* ---------- FORMULÁRIO (ADICIONAR / EDITAR) ---------- */
 
 .form-panel {
   background: var(--card-bg);
   border: 1px solid var(--border);
   border-radius: var(--radius);
   padding: 26px;
-  max-width: 620px;
+  max-width: 680px;
   box-shadow: var(--shadow-card);
 }
 
 .field { margin-bottom: 17px; }
 
-.field label {
-  display: block;
-  font-size: 12.5px;
-  font-weight: 700;
-  color: var(--text-dim);
-  margin-bottom: 7px;
-}
+.field label { display: block; font-size: 12.5px; font-weight: 700; color: var(--text-dim); margin-bottom: 7px; }
 
 .field input[type="text"],
 .field input[type="number"],
@@ -428,20 +497,58 @@ html, body {
 .photo-drop:hover { border-color: var(--accent-dark); }
 .photo-drop .icon { font-size: 24px; margin-bottom: 8px; color: var(--text-faint); }
 .photo-drop .hint { font-size: 12.5px; color: var(--text-faint); }
-
 .photo-drop input[type="file"] { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
 
-.photo-preview {
-  width: 100%;
-  aspect-ratio: 16/9;
-  border-radius: var(--radius-sm);
-  overflow: hidden;
-  margin-top: 12px;
-  display: none;
-  border: 1px solid var(--border);
+.photo-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+  gap: 10px;
+  margin-top: 14px;
 }
 
-.photo-preview img { width: 100%; height: 100%; object-fit: cover; }
+.photo-tile {
+  position: relative;
+  aspect-ratio: 1;
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  border: 1px solid var(--border);
+  background: var(--box-bg);
+}
+
+.photo-tile img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+.photo-tile .remove-tile {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: rgba(20,22,26,0.75);
+  color: #fff;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 12px;
+}
+
+.photo-tile .remove-tile:hover { background: var(--cta); }
+
+.photo-tile .tile-badge {
+  position: absolute;
+  bottom: 5px;
+  left: 5px;
+  background: rgba(20,22,26,0.75);
+  color: #fff;
+  font-size: 9.5px;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: 999px;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
 
 .form-submit-row { display: flex; align-items: center; gap: 14px; margin-top: 4px; }
 .form-note { font-size: 12px; color: var(--text-faint); }

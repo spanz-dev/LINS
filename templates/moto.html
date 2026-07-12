@@ -12,9 +12,9 @@
   <link rel="stylesheet" href="{{ url_for('static', filename='custom.css') }}" />
 </head>
 <body>
-  <div class="wrap">
 
-    <header class="site-header">
+  <nav class="navbar">
+    <div class="navbar-inner">
       <a href="{{ url_for('html') }}" class="brand">
         <span class="brand-mark"><span class="icon" id="brandIcon"></span></span>
         <span class="brand-text">
@@ -22,10 +22,18 @@
           <span>Seu acervo pessoal</span>
         </span>
       </a>
-      <a href="{{ url_for('pagina_adicionar') }}" class="btn btn-primary">
-        <span class="icon" id="addIcon"></span> Adicionar moto
-      </a>
-    </header>
+      <div class="navbar-nav">
+        <a href="{{ url_for('html') }}" class="nav-link">
+          <span class="icon" id="navMotoIcon"></span> Motos
+        </a>
+        <a href="{{ url_for('pagina_adicionar') }}" class="nav-link nav-cta">
+          <span class="icon" id="navAddIcon"></span> Adicionar moto
+        </a>
+      </div>
+    </div>
+  </nav>
+
+  <div class="wrap">
 
     <a href="{{ url_for('html') }}" class="back-link">
       <span class="icon" id="backIcon"></span> Voltar para a garagem
@@ -45,7 +53,8 @@
   <script src="{{ url_for('static', filename='icons.js') }}"></script>
   <script>
     document.getElementById('brandIcon').innerHTML = Icons.brand;
-    document.getElementById('addIcon').innerHTML = Icons.plus;
+    document.getElementById('navMotoIcon').innerHTML = Icons.brand;
+    document.getElementById('navAddIcon').innerHTML = Icons.plus;
     document.getElementById('backIcon').innerHTML = Icons.chevronLeft;
     document.getElementById('loadingIcon').innerHTML = Icons.clock;
 
@@ -53,6 +62,7 @@
     const id = params.get('id');
     const content = document.getElementById('content');
     const toast = document.getElementById('toast');
+    let indiceAtual = 0;
 
     function showToast(msg) {
       toast.textContent = msg;
@@ -70,7 +80,53 @@
       `;
     }
 
+    function atualizarGaleria(fotos) {
+      const mainWrap = document.getElementById('galleryMain');
+      const thumbsWrap = document.getElementById('galleryThumbs');
+
+      if (!fotos.length) {
+        mainWrap.innerHTML = `<span class="icon">${Icons.brand}</span>`;
+        if (thumbsWrap) thumbsWrap.innerHTML = '';
+        return;
+      }
+
+      const setas = fotos.length > 1 ? `
+        <button class="gallery-nav-btn prev" id="prevBtn" type="button">${Icons.chevronLeft}</button>
+        <button class="gallery-nav-btn next" id="nextBtn" type="button">${Icons.chevronRight}</button>
+      ` : '';
+
+      mainWrap.innerHTML = `<img src="${fotos[indiceAtual]}" alt="Foto da moto">${setas}`;
+
+      if (fotos.length > 1) {
+        document.getElementById('prevBtn').addEventListener('click', () => {
+          indiceAtual = (indiceAtual - 1 + fotos.length) % fotos.length;
+          atualizarGaleria(fotos);
+        });
+        document.getElementById('nextBtn').addEventListener('click', () => {
+          indiceAtual = (indiceAtual + 1) % fotos.length;
+          atualizarGaleria(fotos);
+        });
+      }
+
+      if (thumbsWrap) {
+        thumbsWrap.innerHTML = fotos.map((f, i) => `
+          <div class="gallery-thumb ${i === indiceAtual ? 'active' : ''}" data-i="${i}">
+            <img src="${f}" alt="Miniatura ${i + 1}">
+          </div>
+        `).join('');
+
+        thumbsWrap.querySelectorAll('.gallery-thumb').forEach(el => {
+          el.addEventListener('click', () => {
+            indiceAtual = Number(el.dataset.i);
+            atualizarGaleria(fotos);
+          });
+        });
+      }
+    }
+
     function renderMoto(moto) {
+      const fotos = moto.fotos || [];
+
       content.innerHTML = `
         <div class="detail-title-row">
           <span class="eyebrow">Nº ${String(moto.id).padStart(4, '0')} · Ficha da moto</span>
@@ -78,10 +134,9 @@
           <div class="moto-sub">${moto.cilindrada} cc · ${moto.categoria}</div>
         </div>
 
-        <div class="detail-photo">
-          ${moto.foto
-            ? `<img src="${moto.foto}" alt="${moto.marca} ${moto.modelo}">`
-            : `<span class="icon">${Icons.brand}</span>`}
+        <div class="gallery-layout">
+          <div class="gallery-main" id="galleryMain"></div>
+          ${fotos.length > 1 ? '<div class="gallery-thumbs" id="galleryThumbs"></div>' : ''}
         </div>
 
         <div class="spec-grid">
@@ -104,11 +159,17 @@
         </div>
 
         <div class="detail-actions">
+          <a href="/editar.html?id=${moto.id}" class="btn btn-ghost">
+            <span class="icon">${Icons.edit}</span> Editar
+          </a>
           <button class="btn btn-danger" id="removerBtn">
             <span class="icon">${Icons.trash}</span> Remover moto
           </button>
         </div>
       `;
+
+      indiceAtual = 0;
+      atualizarGaleria(fotos);
 
       document.getElementById('removerBtn').addEventListener('click', async () => {
         if (!confirm('Tem certeza que deseja remover esta moto da garagem?')) return;
