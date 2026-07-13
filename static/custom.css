@@ -9,9 +9,13 @@
   --border: #e3e5e9;
   --border-strong: #d3d6dc;
 
-  --navbar-bg: #14161a;
+  --navbar-bg: #0a0a0a;
   --navbar-text: #e7e8ea;
   --navbar-text-dim: #9a9ea6;
+
+  --gold-light: #f2c94c;
+  --gold: #d4a017;
+  --gold-dark: #a67c1f;
 
   --accent: #f4b400;
   --accent-dark: #171819;
@@ -52,7 +56,18 @@ html, body {
 
 .navbar {
   background: var(--navbar-bg);
-  border-bottom: 1px solid #24262c;
+  position: relative;
+}
+
+.navbar::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -2px;
+  height: 2px;
+  background: linear-gradient(90deg, transparent 0%, var(--gold) 12%, var(--gold-light) 50%, var(--gold) 88%, transparent 100%);
+  box-shadow: 0 0 14px 0 rgba(212, 160, 23, 0.55);
 }
 
 .navbar-inner {
@@ -77,11 +92,12 @@ html, body {
   width: 34px;
   height: 34px;
   border-radius: 8px;
-  background: #22242b;
-  color: var(--accent);
+  background: linear-gradient(155deg, var(--gold-light), var(--gold-dark));
+  color: #0a0a0a;
   display: flex;
   align-items: center;
   justify-content: center;
+  box-shadow: 0 0 10px -2px rgba(212, 160, 23, 0.6);
 }
 
 .brand-mark .icon { font-size: 17px; }
@@ -110,15 +126,16 @@ html, body {
 }
 
 .nav-link .icon { font-size: 15px; }
-.nav-link:hover { color: #fff; background: rgba(255,255,255,0.06); }
-.nav-link.active { color: #fff; background: rgba(255,255,255,0.08); }
+.nav-link:hover { color: var(--gold-light); background: rgba(212, 160, 23, 0.1); }
+.nav-link.active { color: var(--gold-light); background: rgba(212, 160, 23, 0.14); }
 
 .nav-link.nav-cta {
-  background: var(--cta);
-  color: #fff;
-  font-weight: 700;
+  background: linear-gradient(135deg, var(--gold-light), var(--gold-dark));
+  color: #0a0a0a;
+  font-weight: 800;
+  box-shadow: 0 0 14px -3px rgba(212, 160, 23, 0.6);
 }
-.nav-link.nav-cta:hover { background: var(--cta-dark); }
+.nav-link.nav-cta:hover { filter: brightness(1.08); }
 
 /* ---------- BOTÕES GERAIS ---------- */
 
