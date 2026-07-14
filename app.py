@@ -1,5 +1,6 @@
-from flask import Flask, render_template, request, jsonify
+from flask import Flask, render_template, request, jsonify, session, redirect, url_for
 from werkzeug.exceptions import RequestEntityTooLarge
+from functools import wraps
 import psycopg2
 import os
 import base64
@@ -7,7 +8,14 @@ import json
 
 app = Flask(__name__)
 
+# Necessário pra manter a sessão de login. Em produção, defina a variável de
+# ambiente SECRET_KEY no Render com um valor aleatório (não deixe o padrão).
+app.secret_key = os.getenv("SECRET_KEY", "troque-esta-chave-em-producao")
+
 DATABASE_URL = os.getenv("DATABASE_URL")
+
+USUARIO_ADMIN = "admin"
+SENHA_ADMIN = "1702"
 
 ALLOWED_MIMETYPES = {"image/png", "image/jpeg", "image/webp", "image/gif"}
 # As fotos já são comprimidas no navegador antes do envio; esse limite é só uma margem
@@ -65,6 +73,26 @@ def criar_tabela():
 criar_tabela()
 
 
+def login_obrigatorio(f):
+    """Protege páginas do painel: se não estiver logado, manda pro login."""
+    @wraps(f)
+    def decorada(*args, **kwargs):
+        if not session.get('logado'):
+            return redirect(url_for('pagina_login'))
+        return f(*args, **kwargs)
+    return decorada
+
+
+def login_obrigatorio_api(f):
+    """Protege rotas de API que alteram dados (cadastrar/editar/remover moto)."""
+    @wraps(f)
+    def decorada(*args, **kwargs):
+        if not session.get('logado'):
+            return jsonify({"ok": False, "erros": ["Sessão expirada. Faça login novamente."]}), 401
+        return f(*args, **kwargs)
+    return decorada
+
+
 def codificar_foto(arquivo):
     """Lê um arquivo enviado e devolve uma data URI base64 (ou None)."""
     if not arquivo or arquivo.filename == "":
@@ -111,33 +139,70 @@ def moto_para_dict(moto):
 # ---------------- PÁGINAS ----------------
 
 @app.route('/')
-def html():
+def pagina_loja():
+    return render_template("loja.html")
+
+
+@app.route('/login.html')
+def pagina_login():
+    if session.get('logado'):
+        return redirect(url_for('admin_home'))
+    return render_template("login.html")
+
+
+@app.route('/admin')
+@login_obrigatorio
+def admin_home():
     return render_template("index.html")
 
 
 @app.route('/moto.html')
+@login_obrigatorio
 def pagina_detalhe():
     return render_template("moto.html")
 
 
 @app.route('/adicionar.html')
+@login_obrigatorio
 def pagina_adicionar():
     return render_template("adicionar.html")
 
 
 @app.route('/editar.html')
+@login_obrigatorio
 def pagina_editar():
     return render_template("editar.html")
 
 
 @app.route('/loja.html')
-def pagina_loja():
-    return render_template("loja.html")
+def pagina_loja_alias():
+    return redirect(url_for('pagina_loja'))
 
 
-# ---------------- API ----------------
+# ---------------- LOGIN ----------------
+
+@app.route("/api/login", methods=["POST"])
+def api_login():
+    usuario = request.form.get("usuario", "").strip()
+    senha = request.form.get("senha", "").strip()
+
+    if usuario == USUARIO_ADMIN and senha == SENHA_ADMIN:
+        session['logado'] = True
+        return jsonify({"ok": True, "mensagem": "Login feito com sucesso"})
+
+    return jsonify({"ok": False, "erros": ["Usuário ou senha incorretos"]}), 401
+
+
+@app.route("/api/logout", methods=["POST"])
+def api_logout():
+    session.pop('logado', None)
+    return jsonify({"ok": True, "mensagem": "Sessão encerrada"})
+
+
+# ---------------- API DE MOTOS ----------------
 
 @app.route('/api/motos', methods=['POST'])
+@login_obrigatorio_api
 def api_motos():
     conexao = None
     cursor = None
@@ -230,6 +295,7 @@ def obter_moto(moto_id):
 
 
 @app.route("/api/motos/<int:moto_id>", methods=["PUT"])
+@login_obrigatorio_api
 def atualizar_moto(moto_id):
     conexao = None
     cursor = None
@@ -296,6 +362,7 @@ def atualizar_moto(moto_id):
 
 
 @app.route("/api/motos/<int:moto_id>", methods=["DELETE"])
+@login_obrigatorio_api
 def deletar_moto(moto_id):
     conexao = None
     cursor = None

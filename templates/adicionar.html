@@ -15,7 +15,7 @@
 
   <nav class="navbar">
     <div class="navbar-inner">
-      <a href="{{ url_for('html') }}" class="brand">
+      <a href="{{ url_for('admin_home') }}" class="brand">
         <span class="brand-mark"><span class="icon" id="brandIcon"></span></span>
         <span class="brand-text">
           <b>Garage Moto</b>
@@ -23,11 +23,14 @@
         </span>
       </a>
       <div class="navbar-nav">
-        <a href="{{ url_for('html') }}" class="nav-link">
+        <a href="{{ url_for('admin_home') }}" class="nav-link">
           <span class="icon" id="navMotoIcon"></span> Motos
         </a>
         <a href="{{ url_for('pagina_adicionar') }}" class="nav-link nav-cta active">
           <span class="icon" id="navAddIcon"></span> Adicionar moto
+        </a>
+        <a href="#" id="linkSair" class="nav-link" title="Sair">
+          <span class="icon" id="sairIcon"></span>
         </a>
       </div>
     </div>
@@ -109,6 +112,17 @@
     document.getElementById('brandIcon').innerHTML = Icons.brand;
     document.getElementById('navMotoIcon').innerHTML = Icons.brand;
     document.getElementById('navAddIcon').innerHTML = Icons.plus;
+    document.getElementById('sairIcon').innerHTML = Icons.logout;
+
+    document.getElementById('linkSair').addEventListener('click', async (e) => {
+      e.preventDefault();
+      try {
+        await fetch('/api/logout', { method: 'POST' });
+      } catch (erro) {
+        console.error('Erro ao sair:', erro);
+      }
+      window.location.href = '/login.html';
+    });
     document.getElementById('cameraIcon').innerHTML = Icons.camera;
     document.getElementById('submitIcon').innerHTML = Icons.plus;
 
