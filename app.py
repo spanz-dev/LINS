@@ -130,6 +130,11 @@ def pagina_editar():
     return render_template("editar.html")
 
 
+@app.route('/loja.html')
+def pagina_loja():
+    return render_template("loja.html")
+
+
 # ---------------- API ----------------
 
 @app.route('/api/motos', methods=['POST'])
