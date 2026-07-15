@@ -40,6 +40,8 @@
   .navbar-brand-custom .parte-1 { color: var(--dourado); }
   .navbar-brand-custom .parte-2 { color: #fff; font-weight: 700; }
 
+  .navbar-logo-img { height: 46px; width: auto; display: block; }
+
   .nav-link-custom {
     color: #d8d8d8 !important;
     font-weight: 600;
@@ -239,8 +241,8 @@
 <!-- ===================== NAVBAR ===================== -->
 <nav class="navbar navbar-expand-lg navbar-visionario sticky-top">
   <div class="container">
-    <a class="navbar-brand navbar-brand-custom" href="#inicio">
-      <span class="parte-1">VISIONÁRIO</span> <span class="parte-2">MOTORS</span>
+    <a class="navbar-brand" href="#inicio">
+      <img src="{{ url_for('static', filename='logo.png') }}" alt="Visionário Motors" class="navbar-logo-img">
     </a>
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navMenu" style="border-color:#333;">
       <span class="navbar-toggler-icon"></span>
@@ -339,14 +341,14 @@
     <div class="rodape-links">
       Compra <span>&bull;</span> Vende <span>&bull;</span> Troca <span>&bull;</span> Financia
     </div>
-    <a class="rodape-telefone" href="" target="_blank" rel="noopener">
-      <i class="bi bi-whatsapp"></i> 
+    <a class="rodape-telefone" href="https://wa.me/5511961607838" target="_blank" rel="noopener">
+      <i class="bi bi-whatsapp"></i> (11) 96160-7838
     </a>
     <div class="rodape-copyright">Visionário Motors &copy; 2026</div>
   </div>
 </footer>
 
-<a class="whatsapp-flutuante" href="" target="_blank" rel="noopener" title="Falar no WhatsApp">
+<a class="whatsapp-flutuante" href="https://wa.me/5511961607838" target="_blank" rel="noopener" title="Falar no WhatsApp">
   <i class="bi bi-whatsapp"></i>
 </a>
 
@@ -379,7 +381,7 @@
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/js/bootstrap.bundle.min.js"></script>
 <script>
-  const NUMERO_WHATSAPP = '';
+  const NUMERO_WHATSAPP = '5511961607838';
   const grid = document.getElementById('gridEstoque');
   const contador = document.getElementById('contadorEstoque');
   let motosCache = [];

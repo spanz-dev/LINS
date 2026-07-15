@@ -53,6 +53,8 @@
     .lado-marca .parte-1 { color: var(--dourado); }
     .lado-marca .parte-2 { color: #fff; }
 
+    .login-logo-img { width: 100%; max-width: 300px; height: auto; }
+
     .lado-marca .linha-dourada {
       width: 70px;
       height: 4px;
@@ -106,7 +108,7 @@
 
     <div class="col-md-6 d-flex justify-content-center align-items-center text-center lado-marca p-4">
       <div>
-        <h1><span class="parte-1">VISIONÁRIO</span><br><span class="parte-2">MOTORS</span></h1>
+        <img src="{{ url_for('static', filename='logo.png') }}" alt="Visionário Motors" class="login-logo-img">
         <div class="linha-dourada"></div>
         <p>Painel administrativo do estoque</p>
       </div>

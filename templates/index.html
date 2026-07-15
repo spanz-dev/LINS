@@ -16,11 +16,7 @@
   <nav class="navbar">
     <div class="navbar-inner">
       <a href="{{ url_for('admin_home') }}" class="brand">
-        <span class="brand-mark"><span class="icon" id="brandIcon"></span></span>
-        <span class="brand-text">
-          <b>Garage Moto</b>
-          <span>Seu acervo pessoal</span>
-        </span>
+        <img src="{{ url_for('static', filename='logo.png') }}" alt="Visionário Motors" class="navbar-logo-img">
       </a>
       <div class="navbar-nav">
         <a href="{{ url_for('admin_home') }}" class="nav-link active">
@@ -59,7 +55,6 @@
 
   <script src="{{ url_for('static', filename='icons.js') }}"></script>
   <script>
-    document.getElementById('brandIcon').innerHTML = Icons.brand;
     document.getElementById('navMotoIcon').innerHTML = Icons.brand;
     document.getElementById('navAddIcon').innerHTML = Icons.plus;
     document.getElementById('sairIcon').innerHTML = Icons.logout;
