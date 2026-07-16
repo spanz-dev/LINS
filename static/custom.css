@@ -88,6 +88,13 @@ html, body {
   color: var(--navbar-text);
 }
 
+.navbar-logo-img {
+  height: 42px;
+  width: auto;
+  aspect-ratio: 900 / 398;
+  display: block;
+}
+
 .brand-mark {
   width: 34px;
   height: 34px;

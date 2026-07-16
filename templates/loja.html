@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Visionário Motors | Motos novas e seminovas</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/css/bootstrap.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.11.3/font/bootstrap-icons.min.css">
+
+<style>
+  :root {
+    --preto: #0a0a0a;
+    --preto-2: #131313;
+    --dourado: #f7c600;
+    --dourado-claro: #ffd94d;
+    --dourado-escuro: #c79e00;
+    --whats: #25d366;
+    --whats-escuro: #1da851;
+    --texto-claro: #f3f3f3;
+    --texto-muted: #a8a8a8;
+  }
+
+  * { font-family: 'Manrope', sans-serif; }
+
+  body { background: var(--preto-2); color: var(--texto-claro); }
+
+  a { text-decoration: none; }
+  .text-gold { color: var(--dourado); }
+
+  /* ---------- NAVBAR ---------- */
+
+  .navbar-visionario { background: var(--preto); padding: 14px 0; border-bottom: 1px solid #1f1f1f; }
+
+  .navbar-brand-custom { font-weight: 800; font-size: 1.5rem; letter-spacing: 0.01em; }
+  .navbar-brand-custom .parte-1 { color: var(--dourado); }
+  .navbar-brand-custom .parte-2 { color: #fff; font-weight: 700; }
+
+  .navbar-logo-img { height: 46px; width: auto; aspect-ratio: 900 / 398; display: block; }
+
+  .nav-link-custom {
+    color: #d8d8d8 !important;
+    font-weight: 600;
+    font-size: 0.95rem;
+    padding: 8px 16px !important;
+    position: relative;
+  }
+  .nav-link-custom.active { color: #fff !important; }
+  .nav-link-custom.active::after {
+    content: '';
+    position: absolute; left: 16px; right: 16px; bottom: 0;
+    height: 2px; background: var(--dourado); border-radius: 2px;
+  }
+
+  .btn-whatsapp {
+    background: var(--whats);
+    color: #fff !important;
+    font-weight: 700;
+    border-radius: 999px;
+    padding: 9px 20px;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    border: none;
+    transition: background 0.15s ease;
+  }
+  .btn-whatsapp:hover { background: var(--whats-escuro); color: #fff; }
+
+  .btn-preto-outline {
+    border: 1.5px solid #3a3a3a;
+    color: #fff !important;
+    font-weight: 700;
+    border-radius: 999px;
+    padding: 9px 18px;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: transparent;
+    transition: background 0.15s ease, border-color 0.15s ease;
+  }
+  .btn-preto-outline:hover { background: #1c1c1c; border-color: #555; color: #fff !important; }
+
+  /* ---------- HERO ---------- */
+
+  .hero {
+    position: relative;
+    padding: 90px 0 70px;
+    background:
+      radial-gradient(ellipse 900px 500px at 85% 20%, rgba(247,198,0,0.10), transparent 60%),
+      radial-gradient(ellipse 700px 500px at 10% 90%, rgba(247,198,0,0.06), transparent 55%),
+      var(--preto);
+    overflow: hidden;
+  }
+
+  .hero-content { position: relative; z-index: 2; }
+
+  .hero h1 { font-size: clamp(2.4rem, 5vw, 3.6rem); font-weight: 800; line-height: 1.12; letter-spacing: -0.01em; }
+
+  .hero p.lead-custom { color: var(--texto-muted); font-size: 1.08rem; max-width: 46ch; margin: 20px 0 30px; }
+
+  .btn-gold {
+    background: linear-gradient(135deg, var(--dourado-claro), var(--dourado-escuro));
+    color: #0a0a0a; font-weight: 800; border-radius: 8px; padding: 14px 26px; border: none;
+    box-shadow: 0 10px 26px -10px rgba(247,198,0,0.5);
+    transition: filter 0.15s ease;
+  }
+  .btn-gold:hover { filter: brightness(1.06); color: #0a0a0a; }
+
+  .btn-outline-hero {
+    border: 1.5px solid #fff; color: #fff; font-weight: 700; border-radius: 8px; padding: 14px 24px;
+    display: inline-flex; align-items: center; gap: 10px;
+    transition: background 0.15s ease, color 0.15s ease;
+  }
+  .btn-outline-hero:hover { background: #fff; color: #0a0a0a; }
+
+  .hero-graphic { position: relative; z-index: 1; display: flex; align-items: center; justify-content: center; }
+  .hero-graphic svg { width: 100%; max-width: 420px; opacity: 0.9; }
+
+  .hero-bg-illustration {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    overflow: hidden;
+  }
+
+  .hero-bg-illustration img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+    display: block;
+  }
+
+  .hero-bg-illustration::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(90deg, rgba(10,10,10,0.97) 0%, rgba(10,10,10,0.82) 40%, rgba(10,10,10,0.35) 75%, rgba(10,10,10,0.15) 100%);
+  }
+
+  /* ---------- BARRA DE RECURSOS ---------- */
+
+  .feature-bar { background: linear-gradient(90deg, var(--dourado-escuro), var(--dourado), var(--dourado-escuro)); }
+
+  .feature-item {
+    display: flex; align-items: center; justify-content: center; gap: 10px;
+    padding: 18px 12px; color: #0a0a0a; font-weight: 800; font-size: 0.95rem;
+    letter-spacing: 0.03em; text-align: center;
+  }
+  .feature-item i { font-size: 1.25rem; }
+
+  /* ---------- DESTAQUES / ESTOQUE ---------- */
+
+  .secao-destaque { padding: 56px 0 70px; }
+  .secao-destaque h2 { font-weight: 800; font-size: 1.6rem; margin-bottom: 4px; }
+  .secao-destaque .subtitulo { color: var(--texto-muted); font-size: 0.95rem; }
+
+  .moto-card-cliente {
+    background: #191919;
+    border: 1px solid #262626;
+    border-radius: 14px;
+    overflow: hidden;
+    height: 100%;
+    transition: transform 0.15s ease, border-color 0.15s ease;
+  }
+  .moto-card-cliente:hover { transform: translateY(-4px); border-color: #3a3a3a; }
+
+  .moto-photo-placeholder {
+    aspect-ratio: 4/3;
+    background: linear-gradient(135deg, #1f1f1f, #141414);
+    display: flex; align-items: center; justify-content: center;
+    color: #4a4a4a; font-size: 2.6rem; border-bottom: 1px solid #262626;
+    overflow: hidden;
+  }
+  .moto-photo-placeholder img { width: 100%; height: 100%; object-fit: cover; }
+
+  .moto-card-cliente h5 { font-weight: 800; font-size: 1.02rem; margin-bottom: 4px; }
+  .moto-card-cliente .info-linha { color: var(--texto-muted); font-size: 0.85rem; margin-bottom: 14px; }
+
+  .card-botoes { display: flex; gap: 8px; }
+  .card-botoes .btn-preto-outline { flex: 1; justify-content: center; padding: 10px 12px; font-size: 0.85rem; }
+  .card-botoes .btn-whatsapp { width: 42px; height: 42px; padding: 0; justify-content: center; flex-shrink: 0; }
+
+  .estado-vazio {
+    text-align: center;
+    padding: 60px 20px;
+    color: var(--texto-muted);
+    background: #191919;
+    border: 1px dashed #333;
+    border-radius: 14px;
+  }
+  .estado-vazio i { font-size: 2rem; color: #4a4a4a; margin-bottom: 12px; display: block; }
+
+  /* ---------- MODAL ---------- */
+
+  .modal-content-visionario { background: #161616; color: var(--texto-claro); border: 1px solid #2a2a2a; }
+  .modal-content-visionario .modal-header { border-bottom: 1px solid #262626; }
+  .modal-content-visionario .btn-close { filter: invert(1); }
+
+  #modalCarousel .carousel-item img {
+    width: 100%; aspect-ratio: 16/10; object-fit: cover; border-radius: 10px;
+  }
+  #modalCarousel .placeholder-img {
+    width: 100%; aspect-ratio: 16/10; border-radius: 10px;
+    background: linear-gradient(135deg, #1f1f1f, #141414);
+    display: flex; align-items: center; justify-content: center;
+    color: #4a4a4a; font-size: 3rem;
+  }
+
+  .modal-spec-grid {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 1px;
+    background: #262626; border: 1px solid #262626; border-radius: 10px;
+    overflow: hidden; margin-top: 18px;
+  }
+  .modal-spec-cell { background: #1e1e1e; padding: 12px 14px; }
+  .modal-spec-cell label {
+    display: block; font-size: 10.5px; font-weight: 700; letter-spacing: 0.04em;
+    text-transform: uppercase; color: #7a7a7a; margin-bottom: 5px;
+  }
+  .modal-spec-cell .val { font-size: 15px; font-weight: 700; color: #fff; }
+
+  /* ---------- RODAPÉ ---------- */
+
+  footer.rodape-visionario { background: var(--preto); padding: 40px 0 30px; border-top: 1px solid #1f1f1f; }
+  .rodape-links { font-weight: 600; color: #d8d8d8; font-size: 0.95rem; }
+  .rodape-links span { color: var(--dourado); margin: 0 10px; }
+  .rodape-telefone {
+    color: var(--whats); font-weight: 800; font-size: 1.3rem; margin: 14px 0 6px;
+    display: inline-flex; align-items: center; gap: 10px;
+  }
+  .rodape-copyright { color: #6b6b6b; font-size: 0.85rem; }
+
+  /* ---------- WHATSAPP FLUTUANTE ---------- */
+
+  .whatsapp-flutuante {
+    position: fixed; bottom: 22px; right: 22px; width: 58px; height: 58px;
+    border-radius: 50%; background: var(--whats); color: #fff;
+    display: flex; align-items: center; justify-content: center; font-size: 1.7rem;
+    box-shadow: 0 10px 24px -6px rgba(37, 211, 102, 0.6);
+    z-index: 999; transition: transform 0.15s ease;
+  }
+  .whatsapp-flutuante:hover { transform: scale(1.07); color: #fff; }
+
+  @media (max-width: 991px) { .navbar-collapse { padding-top: 14px; } }
+</style>
+</head>
+<body>
+
+<!-- ===================== NAVBAR ===================== -->
+<nav class="navbar navbar-expand-lg navbar-visionario sticky-top">
+  <div class="container">
+    <a class="navbar-brand" href="#inicio">
+      <img src="{{ url_for('static', filename='logo.png') }}" alt="Visionário Motors" width="900" height="398" class="navbar-logo-img">
+    </a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navMenu" style="border-color:#333;">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navMenu">
+      <ul class="navbar-nav mx-auto text-center">
+        <li class="nav-item"><a class="nav-link nav-link-custom active" href="#inicio">Início</a></li>
+        <li class="nav-item"><a class="nav-link nav-link-custom" href="#destaques">Estoque</a></li>
+        <li class="nav-item"><a class="nav-link nav-link-custom" href="#contato">Contato</a></li>
+      </ul>
+      <a class="btn-whatsapp mt-3 mt-lg-0" href="https://wa.me/5511961607838" target="_blank" rel="noopener">
+        <i class="bi bi-whatsapp"></i> WhatsApp
+      </a>
+      <a class="btn-preto-outline mt-3 mt-lg-0 ms-lg-2" href="/login.html">
+        <i class="bi bi-box-arrow-in-right"></i> Login
+      </a>
+    </div>
+  </div>
+</nav>
+
+<!-- ===================== HERO ===================== -->
+<section class="hero" id="inicio">
+  <div class="hero-bg-illustration">
+    <img src="{{ url_for('static', filename='hero-motos.jpg') }}" alt="Motos em exposição na loja">
+  </div>
+  <div class="container">
+    <div class="row align-items-center g-5">
+      <div class="col-lg-7 hero-content">
+        <h1>SUA PRÓXIMA MOTO<br><span class="text-gold">ESTÁ AQUI</span></h1>
+        <p class="lead-custom">Motos novas e seminovas com qualidade, procedência e atendimento direto pelo WhatsApp.</p>
+        <div class="d-flex flex-wrap gap-3">
+          <a href="#destaques" class="btn-gold">VER ESTOQUE</a>
+          <a href="https://wa.me/5511961607838" target="_blank" rel="noopener" class="btn-outline-hero">
+            <i class="bi bi-whatsapp"></i> FALAR NO WHATSAPP
+          </a>
+        </div>
+      </div>
+      <div class="col-lg-5 d-none d-lg-block"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== BARRA DE RECURSOS ===================== -->
+<div class="feature-bar">
+  <div class="container">
+    <div class="row g-0">
+      <div class="col-6 col-md-3 feature-item"><i class="bi bi-cart-fill"></i> COMPRA</div>
+      <div class="col-6 col-md-3 feature-item"><i class="bi bi-tag-fill"></i> VENDE</div>
+      <div class="col-6 col-md-3 feature-item"><i class="bi bi-arrow-left-right"></i> TROCA</div>
+      <div class="col-6 col-md-3 feature-item"><i class="bi bi-shield-fill-check"></i> FINANCIA</div>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== ESTOQUE (dados reais da API) ===================== -->
+<section class="secao-destaque" id="destaques">
+  <div class="container">
+    <div class="d-flex justify-content-between align-items-start flex-wrap gap-3 mb-4">
+      <div>
+        <h2><i class="bi bi-star-fill text-gold"></i> Nosso Estoque</h2>
+        <div class="subtitulo" id="contadorEstoque">Carregando motos...</div>
+      </div>
+      <a class="btn-whatsapp" href="https://wa.me/5511961607838" target="_blank" rel="noopener">
+        <i class="bi bi-whatsapp"></i> WhatsApp
+      </a>
+    </div>
+
+    <div class="row g-4" id="gridEstoque">
+      <div class="col-12">
+        <div class="estado-vazio">
+          <i class="bi bi-hourglass-split"></i>
+          Carregando estoque...
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== RODAPÉ ===================== -->
+<footer class="rodape-visionario" id="contato">
+  <div class="container text-center">
+    <div class="rodape-links">
+      Compra <span>&bull;</span> Vende <span>&bull;</span> Troca <span>&bull;</span> Financia
+    </div>
+    <a class="rodape-telefone" href="https://wa.me/5511961607838" target="_blank" rel="noopener">
+      <i class="bi bi-whatsapp"></i> (11) 96160-7838
+    </a>
+    <div class="rodape-copyright">Visionário Motors &copy; 2026</div>
+  </div>
+</footer>
+
+<a class="whatsapp-flutuante" href="https://wa.me/5511961607838" target="_blank" rel="noopener" title="Falar no WhatsApp">
+  <i class="bi bi-whatsapp"></i>
+</a>
+
+<!-- ===================== MODAL DE DETALHES ===================== -->
+<div class="modal fade" id="motoModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content modal-content-visionario">
+      <div class="modal-header">
+        <h5 class="modal-title fw-bold" id="modalTitulo">Moto</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <div id="modalCarouselWrap"></div>
+
+        <div class="modal-spec-grid">
+          <div class="modal-spec-cell"><label>Ano</label><div class="val" id="modalAno">-</div></div>
+          <div class="modal-spec-cell"><label>Quilometragem</label><div class="val" id="modalKm">-</div></div>
+          <div class="modal-spec-cell"><label>Cilindrada</label><div class="val" id="modalCc">-</div></div>
+          <div class="modal-spec-cell"><label>Categoria</label><div class="val" id="modalCategoria">-</div></div>
+        </div>
+      </div>
+      <div class="modal-footer" style="border-top: 1px solid #262626;">
+        <a href="#" id="modalWhatsapp" target="_blank" rel="noopener" class="btn-whatsapp w-100 justify-content-center">
+          <i class="bi bi-whatsapp"></i> Tenho Interesse
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/js/bootstrap.bundle.min.js"></script>
+<script>
+  const NUMERO_WHATSAPP = '5511961607838';
+  const grid = document.getElementById('gridEstoque');
+  const contador = document.getElementById('contadorEstoque');
+  let motosCache = [];
+
+  function linkWhatsapp(moto) {
+    const msg = encodeURIComponent(`Olá! Tenho interesse na ${moto.marca} ${moto.modelo} (${moto.ano}).`);
+    return `https://wa.me/${NUMERO_WHATSAPP}?text=${msg}`;
+  }
+
+  function renderEstoque(motos) {
+    if (motos.length === 0) {
+      grid.innerHTML = `
+        <div class="col-12">
+          <div class="estado-vazio">
+            <i class="bi bi-emoji-frown"></i>
+            Nenhuma moto no estoque no momento.
+          </div>
+        </div>
+      `;
+      return;
+    }
+
+    grid.innerHTML = motos.map(m => {
+      const foto = m.fotos && m.fotos.length ? m.fotos[0] : null;
+      return `
+        <div class="col-md-6 col-lg-4">
+          <div class="moto-card-cliente">
+            <div class="moto-photo-placeholder">
+              ${foto ? `<img src="${foto}" alt="${m.marca} ${m.modelo}">` : `<i class="bi bi-image"></i>`}
+            </div>
+            <div class="p-3">
+              <h5>${m.marca.toUpperCase()} ${m.modelo.toUpperCase()}</h5>
+              <div class="info-linha">${m.ano} &bull; ${Number(m.quilometragem).toLocaleString('pt-BR')} km &bull; ${m.cilindrada} cc</div>
+              <div class="card-botoes">
+                <button type="button" class="btn-preto-outline" onclick="abrirModal('${m.id}')">
+                  <i class="bi bi-info-circle"></i> Ver informações
+                </button>
+                <a class="btn-whatsapp" href="${linkWhatsapp(m)}" target="_blank" rel="noopener" title="Falar no WhatsApp">
+                  <i class="bi bi-whatsapp"></i>
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  async function carregarEstoque() {
+    try {
+      const resp = await fetch('/api/motos_cadastradas');
+      motosCache = await resp.json();
+      contador.textContent = `${motosCache.length} moto${motosCache.length === 1 ? '' : 's'} disponíve${motosCache.length === 1 ? 'l' : 'is'}`;
+      renderEstoque(motosCache);
+    } catch (erro) {
+      console.error('Erro ao carregar estoque:', erro);
+      contador.textContent = 'Não foi possível carregar o estoque agora.';
+      grid.innerHTML = `
+        <div class="col-12">
+          <div class="estado-vazio">
+            <i class="bi bi-exclamation-triangle"></i>
+            Não foi possível carregar o estoque. Tente novamente em instantes.
+          </div>
+        </div>
+      `;
+    }
+  }
+
+  function abrirModal(id) {
+    const moto = motosCache.find(m => String(m.id) === String(id));
+    if (!moto) return;
+
+    document.getElementById('modalTitulo').textContent = `${moto.marca} ${moto.modelo}`;
+    document.getElementById('modalAno').textContent = moto.ano;
+    document.getElementById('modalKm').textContent = `${Number(moto.quilometragem).toLocaleString('pt-BR')} km`;
+    document.getElementById('modalCc').textContent = `${moto.cilindrada} cc`;
+    document.getElementById('modalCategoria').textContent = moto.categoria;
+    document.getElementById('modalWhatsapp').href = linkWhatsapp(moto);
+
+    const fotos = moto.fotos || [];
+    const carouselWrap = document.getElementById('modalCarouselWrap');
+
+    if (fotos.length === 0) {
+      carouselWrap.innerHTML = `<div class="placeholder-img"><i class="bi bi-image"></i></div>`;
+    } else if (fotos.length === 1) {
+      carouselWrap.innerHTML = `<img src="${fotos[0]}" alt="${moto.marca} ${moto.modelo}" style="width:100%;aspect-ratio:16/10;object-fit:cover;border-radius:10px;">`;
+    } else {
+      carouselWrap.innerHTML = `
+        <div id="modalCarousel" class="carousel slide">
+          <div class="carousel-inner">
+            ${fotos.map((f, i) => `
+              <div class="carousel-item ${i === 0 ? 'active' : ''}">
+                <img src="${f}" alt="Foto ${i + 1}">
+              </div>
+            `).join('')}
+          </div>
+          <button class="carousel-control-prev" type="button" data-bs-target="#modalCarousel" data-bs-slide="prev">
+            <span class="carousel-control-prev-icon"></span>
+          </button>
+          <button class="carousel-control-next" type="button" data-bs-target="#modalCarousel" data-bs-slide="next">
+            <span class="carousel-control-next-icon"></span>
+          </button>
+        </div>
+      `;
+    }
+
+    new bootstrap.Modal(document.getElementById('motoModal')).show();
+  }
+
+  carregarEstoque();
+</script>
+</body>
+</html>
