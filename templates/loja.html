@@ -40,7 +40,7 @@
   .navbar-brand-custom .parte-1 { color: var(--dourado); }
   .navbar-brand-custom .parte-2 { color: #fff; font-weight: 700; }
 
-  .navbar-logo-img { height: 46px; width: auto; display: block; }
+  .navbar-logo-img { height: 46px; width: auto; aspect-ratio: 900 / 398; display: block; }
 
   .nav-link-custom {
     color: #d8d8d8 !important;
@@ -254,7 +254,7 @@
 <nav class="navbar navbar-expand-lg navbar-visionario sticky-top">
   <div class="container">
     <a class="navbar-brand" href="#inicio">
-      <img src="{{ url_for('static', filename='logo.png') }}" alt="Visionário Motors" class="navbar-logo-img">
+      <img src="{{ url_for('static', filename='logo.png') }}" alt="Visionário Motors" width="900" height="398" class="navbar-logo-img">
     </a>
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navMenu" style="border-color:#333;">
       <span class="navbar-toggler-icon"></span>

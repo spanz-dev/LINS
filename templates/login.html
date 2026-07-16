@@ -53,7 +53,7 @@
     .lado-marca .parte-1 { color: var(--dourado); }
     .lado-marca .parte-2 { color: #fff; }
 
-    .login-logo-img { width: 100%; max-width: 300px; height: auto; }
+    .login-logo-img { width: 100%; max-width: 300px; height: auto; aspect-ratio: 900 / 398; }
 
     .lado-marca .linha-dourada {
       width: 70px;
@@ -108,7 +108,7 @@
 
     <div class="col-md-6 d-flex justify-content-center align-items-center text-center lado-marca p-4">
       <div>
-        <img src="{{ url_for('static', filename='logo.png') }}" alt="Visionário Motors" class="login-logo-img">
+        <img src="{{ url_for('static', filename='logo.png') }}" alt="Visionário Motors" width="900" height="398" class="login-logo-img">
         <div class="linha-dourada"></div>
         <p>Painel administrativo do estoque</p>
       </div>

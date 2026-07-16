@@ -91,6 +91,7 @@ html, body {
 .navbar-logo-img {
   height: 42px;
   width: auto;
+  aspect-ratio: 900 / 398;
   display: block;
 }
 
