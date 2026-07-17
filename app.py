@@ -8,8 +8,6 @@ import json
 
 app = Flask(__name__)
 
-# Necessário pra manter a sessão de login. Em produção, defina a variável de
-# ambiente SECRET_KEY no Render com um valor aleatório (não deixe o padrão).
 app.secret_key = os.getenv("SECRET_KEY", "troque-esta-chave-em-producao")
 
 DATABASE_URL = os.getenv("DATABASE_URL")
@@ -18,8 +16,7 @@ USUARIO_ADMIN = "admin"
 SENHA_ADMIN = "1702"
 
 ALLOWED_MIMETYPES = {"image/png", "image/jpeg", "image/webp", "image/gif"}
-# As fotos já são comprimidas no navegador antes do envio; esse limite é só uma margem
-# de segurança pra quem tiver JavaScript desativado ou enviar via outra ferramenta.
+
 app.config["MAX_CONTENT_LENGTH"] = 35 * 1024 * 1024  # 35 MB por requisição
 
 
@@ -43,12 +40,10 @@ def criar_tabela():
         )
     """)
 
-    # 'fotos' guarda uma lista JSON de imagens em base64 (permite várias fotos por moto).
-    # Tudo fica no Postgres (nada em disco), então sobrevive a reinícios/deploys no Render.
+   
     cursor.execute("ALTER TABLE motos ADD COLUMN IF NOT EXISTS fotos TEXT")
 
-    # Migração: bancos antigos tinham uma coluna 'foto' única (uma imagem só).
-    # Se existir, movemos esse valor pra dentro de 'fotos' como lista de 1 item.
+
     cursor.execute("""
         SELECT column_name FROM information_schema.columns
         WHERE table_name = 'motos' AND column_name = 'foto'
@@ -69,7 +64,7 @@ def criar_tabela():
     conexao.close()
 
 
-# Cria/atualiza a tabela assim que o app sobe (tanto local quanto no gunicorn)
+
 criar_tabela()
 
 
@@ -307,7 +302,6 @@ def atualizar_moto(moto_id):
         quilometragem = request.form.get('quilometragem')
         categoria = request.form.get('categoria')
 
-        # Fotos antigas que o usuário optou por manter (enviadas como JSON no form)
         fotos_existentes_raw = request.form.get('fotos_existentes', '[]')
         try:
             fotos_existentes = json.loads(fotos_existentes_raw)
@@ -390,8 +384,6 @@ def deletar_moto(moto_id):
 
 
 # ---------------- TRATAMENTO GLOBAL DE ERROS ----------------
-# Garante que erros inesperados sempre voltem em JSON (nunca uma página HTML),
-# senão o fetch() do front-end quebra ao tentar interpretar a resposta.
 
 @app.errorhandler(413)
 def erro_arquivo_grande(e):
