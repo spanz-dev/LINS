@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Visionário Motors | Motos novas e seminovas</title>
+<title>Estoque | Visionário Motors</title>
 
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -247,6 +247,52 @@
   .whatsapp-flutuante:hover { transform: scale(1.07); color: #fff; }
 
   @media (max-width: 991px) { .navbar-collapse { padding-top: 14px; } }
+
+  /* ---------- CABEÇALHO DA PÁGINA DE ESTOQUE (busca) ---------- */
+
+  .estoque-header {
+    padding: 46px 0 34px;
+    background:
+      radial-gradient(ellipse 800px 400px at 80% 0%, rgba(247,198,0,0.08), transparent 60%),
+      var(--preto);
+    border-bottom: 1px solid #1f1f1f;
+  }
+
+  .estoque-header h1 {
+    font-weight: 800;
+    font-size: clamp(1.7rem, 3vw, 2.3rem);
+    margin: 8px 0 18px;
+  }
+
+  .busca-estoque {
+    position: relative;
+    max-width: 480px;
+  }
+
+  .busca-estoque input {
+    width: 100%;
+    background: #161616;
+    border: 1px solid #2a2a2a;
+    color: #fff;
+    border-radius: 999px;
+    padding: 12px 18px 12px 44px;
+    font-size: 0.95rem;
+    outline: none;
+    transition: border-color 0.15s ease;
+  }
+
+  .busca-estoque input:focus { border-color: var(--dourado-escuro); }
+  .busca-estoque input::placeholder { color: #6a6a6a; }
+
+  .busca-estoque i {
+    position: absolute;
+    left: 17px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #6a6a6a;
+    font-size: 1rem;
+  }
+
 </style>
 </head>
 <body>
@@ -254,7 +300,7 @@
 <!-- ===================== NAVBAR ===================== -->
 <nav class="navbar navbar-expand-lg navbar-visionario sticky-top">
   <div class="container">
-    <a class="navbar-brand" href="#inicio">
+    <a class="navbar-brand" href="/">
       <img src="{{ url_for('static', filename='logo.png') }}" alt="Visionário Motors" width="900" height="398" class="navbar-logo-img">
     </a>
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navMenu" style="border-color:#333;">
@@ -262,9 +308,9 @@
     </button>
     <div class="collapse navbar-collapse" id="navMenu">
       <ul class="navbar-nav mx-auto text-center">
-        <li class="nav-item"><a class="nav-link nav-link-custom active" href="#inicio">Início</a></li>
-        <li class="nav-item"><a class="nav-link nav-link-custom" href="/estoque.html">Estoque</a></li>
-        <li class="nav-item"><a class="nav-link nav-link-custom" href="#contato">Contato</a></li>
+        <li class="nav-item"><a class="nav-link nav-link-custom" href="/">Início</a></li>
+        <li class="nav-item"><a class="nav-link nav-link-custom active" href="/estoque.html">Estoque</a></li>
+        <li class="nav-item"><a class="nav-link nav-link-custom" href="/#contato">Contato</a></li>
       </ul>
       <a class="btn-whatsapp mt-3 mt-lg-0" href="https://wa.me/5511961607838" target="_blank" rel="noopener">
         <i class="bi bi-whatsapp"></i> WhatsApp
@@ -276,48 +322,23 @@
   </div>
 </nav>
 
-<!-- ===================== HERO ===================== -->
-<section class="hero" id="inicio">
-  <div class="hero-bg-illustration">
-    <img src="{{ url_for('static', filename='hero-motos.jpg') }}" alt="Motos em exposição na loja">
-  </div>
+<!-- ===================== CABEÇALHO + BUSCA ===================== -->
+<section class="estoque-header">
   <div class="container">
-    <div class="row align-items-center g-5">
-      <div class="col-lg-7 hero-content">
-        <h1>SUA PRÓXIMA MOTO<br><span class="text-gold">ESTÁ AQUI</span></h1>
-        <p class="lead-custom">Motos novas e seminovas com qualidade, procedência e atendimento direto pelo WhatsApp.</p>
-        <div class="d-flex flex-wrap gap-3">
-          <a href="#destaques" class="btn-gold">VER ESTOQUE</a>
-          <a href="https://wa.me/5511961607838" target="_blank" rel="noopener" class="btn-outline-hero">
-            <i class="bi bi-whatsapp"></i> FALAR NO WHATSAPP
-          </a>
-        </div>
-      </div>
-      <div class="col-lg-5 d-none d-lg-block"></div>
+    <span class="eyebrow">Catálogo completo</span>
+    <h1>Nosso Estoque</h1>
+    <div class="busca-estoque">
+      <i class="bi bi-search"></i>
+      <input type="text" id="buscaInput" placeholder="Buscar por marca, modelo ou categoria...">
     </div>
   </div>
 </section>
 
-<!-- ===================== BARRA DE RECURSOS ===================== -->
-<div class="feature-bar">
-  <div class="container">
-    <div class="row g-0">
-      <div class="col-6 col-md-3 feature-item"><i class="bi bi-cart-fill"></i> COMPRA</div>
-      <div class="col-6 col-md-3 feature-item"><i class="bi bi-tag-fill"></i> VENDE</div>
-      <div class="col-6 col-md-3 feature-item"><i class="bi bi-arrow-left-right"></i> TROCA</div>
-      <div class="col-6 col-md-3 feature-item"><i class="bi bi-shield-fill-check"></i> FINANCIA</div>
-    </div>
-  </div>
-</div>
-
 <!-- ===================== ESTOQUE (dados reais da API) ===================== -->
-<section class="secao-destaque" id="destaques">
+<section class="secao-destaque">
   <div class="container">
-    <div class="d-flex justify-content-between align-items-start flex-wrap gap-3 mb-4">
-      <div>
-        <h2><i class="bi bi-star-fill text-gold"></i> Nosso Estoque</h2>
-        <div class="subtitulo" id="contadorEstoque">Carregando motos...</div>
-      </div>
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-4">
+      <div class="subtitulo" id="contadorEstoque">Carregando motos...</div>
       <a class="btn-whatsapp" href="https://wa.me/5511961607838" target="_blank" rel="noopener">
         <i class="bi bi-whatsapp"></i> WhatsApp
       </a>
@@ -383,6 +404,7 @@
   const NUMERO_WHATSAPP = '5511961607838';
   const grid = document.getElementById('gridEstoque');
   const contador = document.getElementById('contadorEstoque');
+  const buscaInput = document.getElementById('buscaInput');
   let motosCache = [];
 
   function linkWhatsapp(moto) {
@@ -396,7 +418,7 @@
         <div class="col-12">
           <div class="estado-vazio">
             <i class="bi bi-emoji-frown"></i>
-            Nenhuma moto no estoque no momento.
+            Nenhuma moto encontrada.
           </div>
         </div>
       `;
@@ -433,7 +455,7 @@
     try {
       const resp = await fetch('/api/motos_cadastradas');
       motosCache = await resp.json();
-      contador.textContent = `${motosCache.length} moto${motosCache.length === 1 ? '' : 's'} disponíve${motosCache.length === 1 ? 'l' : 'is'}`;
+      atualizarContador(motosCache.length);
       renderEstoque(motosCache);
     } catch (erro) {
       console.error('Erro ao carregar estoque:', erro);
@@ -448,6 +470,21 @@
       `;
     }
   }
+
+  function atualizarContador(qtd) {
+    contador.textContent = `${qtd} moto${qtd === 1 ? '' : 's'} disponíve${qtd === 1 ? 'l' : 'is'}`;
+  }
+
+  buscaInput.addEventListener('input', () => {
+    const termo = buscaInput.value.trim().toLowerCase();
+    const filtradas = motosCache.filter(m =>
+      m.marca.toLowerCase().includes(termo) ||
+      m.modelo.toLowerCase().includes(termo) ||
+      m.categoria.toLowerCase().includes(termo)
+    );
+    atualizarContador(filtradas.length);
+    renderEstoque(filtradas);
+  });
 
   function abrirModal(id) {
     const moto = motosCache.find(m => String(m.id) === String(id));
