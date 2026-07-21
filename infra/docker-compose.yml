@@ -1,8 +1,10 @@
+name: enzo-lins
+
 services:
   web:
     build:
-      context: .
-      dockerfile: Dockerfile
+      context: ..
+      dockerfile: infra/Dockerfile
     container_name: enzo-lins-web
     ports:
       - "5001:5000"
@@ -22,7 +24,7 @@ services:
       POSTGRES_USER: enzo
       POSTGRES_PASSWORD: enzo
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - postgres18_data:/var/lib/postgresql
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U enzo -d enzo_lins"]
       interval: 5s
@@ -43,4 +45,4 @@ services:
     restart: unless-stopped
 
 volumes:
-  postgres_data:
+  postgres18_data:

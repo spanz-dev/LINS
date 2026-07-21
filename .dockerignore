@@ -1,0 +1,14 @@
+.git
+**/.git
+__pycache__/
+**/__pycache__/
+*.py[cod]
+.Python
+.venv/
+venv/
+env/
+.env
+.env.*
+*.sqlite
+*.db
+.DS_Store
