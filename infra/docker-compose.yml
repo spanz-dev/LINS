@@ -1,0 +1,46 @@
+services:
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: enzo-lins-web
+    ports:
+      - "5001:5000"
+    environment:
+      SECRET_KEY: "troque-esta-chave-em-producao"
+      DATABASE_URL: "postgresql://enzo:enzo@db:5432/enzo_lins"
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+
+  db:
+    image: postgres:18-alpine
+    container_name: enzo-lins-db
+    environment:
+      POSTGRES_DB: enzo_lins
+      POSTGRES_USER: enzo
+      POSTGRES_PASSWORD: enzo
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U enzo -d enzo_lins"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    restart: unless-stopped
+
+  adminer:
+    image: adminer:4
+    container_name: enzo-lins-adminer
+    ports:
+      - "8080:8080"
+    environment:
+      ADMINER_DEFAULT_SERVER: db
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
