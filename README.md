@@ -1,2 +1,0 @@
-# LINS www
-# WWW
